@@ -1,13 +1,11 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { seedStore } from '../../../server/seed.js';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const projectRoot = path.resolve(__dirname, '../../../');
-const dataDir = path.join(projectRoot, 'data');
-const legacyDataDir = path.join(projectRoot, 'server', 'data');
+import { seedStore } from './seed-store.js';
+import {
+  dataDir,
+  legacyDataDir,
+  usingCustomDataDir,
+} from './paths.js';
 
 const storePath = path.join(dataDir, 'store.json');
 const chainDeploymentPath = path.join(dataDir, 'chain.deployment.json');
@@ -16,6 +14,20 @@ const legacyChainDeploymentPath = path.join(legacyDataDir, 'chain.deployment.jso
 
 function cloneSeedStore() {
   return JSON.parse(JSON.stringify(seedStore));
+}
+
+function withStoreDefaults(store) {
+  return {
+    neighborhoods: store.neighborhoods ?? [],
+    citizens: store.citizens ?? [],
+    citizenshipRequests: store.citizenshipRequests ?? [],
+    laws: store.laws ?? [],
+    commits: store.commits ?? [],
+    proposals: store.proposals ?? [],
+    forks: store.forks ?? [],
+    activities: store.activities ?? [],
+    events: store.events ?? [],
+  };
 }
 
 async function fileExists(targetPath) {
@@ -34,7 +46,7 @@ export async function ensureStoreFile() {
     return;
   }
 
-  if (await fileExists(legacyStorePath)) {
+  if (!usingCustomDataDir && await fileExists(legacyStorePath)) {
     const legacyRaw = await fs.readFile(legacyStorePath, 'utf8');
     await fs.writeFile(storePath, legacyRaw, 'utf8');
     return;
@@ -46,12 +58,15 @@ export async function ensureStoreFile() {
 export async function loadStore() {
   await ensureStoreFile();
   const raw = await fs.readFile(storePath, 'utf8');
-  return JSON.parse(raw);
+  return withStoreDefaults(JSON.parse(raw));
 }
 
 export async function saveStore(store) {
   await fs.mkdir(dataDir, { recursive: true });
-  await fs.writeFile(storePath, JSON.stringify(store, null, 2), 'utf8');
+  const nextStore = JSON.stringify(withStoreDefaults(store), null, 2);
+  const tempPath = `${storePath}.tmp`;
+  await fs.writeFile(tempPath, nextStore, 'utf8');
+  await fs.rename(tempPath, storePath);
 }
 
 export async function loadChainDeployment() {
@@ -60,7 +75,7 @@ export async function loadChainDeployment() {
     return JSON.parse(raw);
   }
 
-  if (await fileExists(legacyChainDeploymentPath)) {
+  if (!usingCustomDataDir && await fileExists(legacyChainDeploymentPath)) {
     const raw = await fs.readFile(legacyChainDeploymentPath, 'utf8');
     return JSON.parse(raw);
   }

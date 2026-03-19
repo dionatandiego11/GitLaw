@@ -56,7 +56,20 @@ describe('server proposal lifecycle', () => {
           address: DEMO_CITIZEN_ADDRESS,
           choice: 'favor',
         }),
-      /nao liberou a etapa de votacao/,
+      /nao abriu votacao/,
+    );
+  });
+
+  it('blocks the author from voting on their own proposal', () => {
+    const store = cloneStore();
+
+    assert.throws(
+      () =>
+        voteOnProposal(store, 'pr-201', {
+          address: DEMO_CITIZEN_ADDRESS,
+          choice: 'favor',
+        }),
+      /nao vota na propria proposta/,
     );
   });
 
@@ -80,6 +93,14 @@ describe('server proposal lifecycle', () => {
 
     assert.equal(result.proposal.forkId, 'fork-1');
     assert.ok(fork.proposalIds.includes(result.proposal.id));
+    assert.ok(
+      store.events.some(
+        (event) =>
+          event.type === 'ProposalCreated' &&
+          event.entityType === 'proposta' &&
+          event.entityId === result.proposal.id,
+      ),
+    );
   });
 
   it('blocks duplicate active forks for the same law and neighborhood', () => {
@@ -89,13 +110,61 @@ describe('server proposal lifecycle', () => {
       () =>
         createFork(store, {
           authorAddress: DEMO_CITIZEN_ADDRESS,
-          lawId: 'lei-2',
           bairroId: 'sape',
-          name: 'Outro experimento no Sape',
-          objective: 'Testar uma segunda versao local da mesma lei base.',
-          durationMonths: 6,
+          sourceProposalId: 'pr-104',
         }),
-      /Ja existe uma variacao ativa/,
+      /Ja existe uma variacao territorial registrada/,
+    );
+  });
+
+  it('only opens a local variation from an approved authorization proposal', () => {
+    const store = cloneStore();
+    store.forks = [];
+    const result = createFork(store, {
+      authorAddress: DEMO_CITIZEN_ADDRESS,
+      bairroId: 'sape',
+      sourceProposalId: 'pr-104',
+    });
+
+    assert.equal(result.fork.sourceProposalId, 'pr-104');
+    assert.equal(result.fork.bairroId, 'sape');
+    assert.equal(result.fork.nome, 'Zoneamento Misto - Sape');
+    assert.ok(
+      store.events.some(
+        (event) =>
+          event.type === 'LocalVariationOpened' &&
+          event.entityId === result.fork.id &&
+          event.payload.sourceProposalId === 'pr-104',
+      ),
+    );
+  });
+
+  it('records vote, approval and law commit events when a proposal reaches quorum', () => {
+    const store = cloneStore();
+
+    const result = voteOnProposal(store, 'pr-102', {
+      address: DEMO_CITIZEN_ADDRESS,
+      choice: 'favor',
+    });
+
+    assert.equal(result.proposal.status, 'aprovado');
+    assert.ok(
+      store.events.some(
+        (event) =>
+          event.type === 'VoteCast' &&
+          event.entityId === 'pr-102' &&
+          event.actorAddress === DEMO_CITIZEN_ADDRESS,
+      ),
+    );
+    assert.ok(
+      store.events.some(
+        (event) => event.type === 'ProposalApproved' && event.entityId === 'pr-102',
+      ),
+    );
+    assert.ok(
+      store.events.some(
+        (event) => event.type === 'LawCommitRecorded' && event.entityId === 'lei-4',
+      ),
     );
   });
 });

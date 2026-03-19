@@ -1,5 +1,5 @@
-import { DEMO_CITIZEN_ADDRESS } from '../../../server/seed.js';
 import {
+  authorizeAction,
   buildFeed,
   buildLawSummary,
   buildProfile,
@@ -7,6 +7,8 @@ import {
   calculateVoteWeight,
   createActivity,
   createHash,
+  determineInitialProposalState,
+  ensureStoreCollections,
   evaluateCi,
   findCitizen,
   findLaw,
@@ -17,39 +19,49 @@ import {
   nextNumericId,
   nowIso,
   proposalDeadlineReached,
+  recordDomainEvent,
+  resolveProposalKind,
   resolveProposalStatus,
   sanitizeText,
   sameAddress,
   slugify,
   sortByDateDesc,
   syncProposalLifecycles,
+  isVariationAuthorizationProposal,
 } from '../../domain/src/index.js';
+import { DEMO_CITIZEN_ADDRESS } from '../../shared/src/constants.js';
 
 export { syncProposalLifecycles } from '../../domain/src/index.js';
 
-export function buildBootstrap(store, address = null) {
+export function buildBootstrap(store, address = null, session = {}) {
+  ensureStoreCollections(store);
+  const resolvedAddress = session.address ?? address ?? null;
+
   return {
     session: {
-      address: address ?? null,
-      citizen: address ? findCitizen(store, address) : null,
-      pendingRequest: address ? findLatestRequest(store, address) : null,
-      demo: false,
+      address: resolvedAddress,
+      citizen: resolvedAddress ? findCitizen(store, resolvedAddress) : null,
+      pendingRequest: resolvedAddress ? findLatestRequest(store, resolvedAddress) : null,
+      authenticated: Boolean(session.authenticated),
+      authMethod: session.authMethod ?? null,
+      demo: session.authMethod === 'demo',
     },
     laws: sortByDateDesc(store.laws.map(buildLawSummary), (law) => law.atualizadaEm),
     commits: sortByDateDesc(store.commits, (commit) => commit.timestamp),
     proposals: sortByDateDesc(
-      store.proposals.map((proposal) => buildProposalView(store, proposal, address)),
+      store.proposals.map((proposal) => buildProposalView(store, proposal, resolvedAddress)),
       (proposal) => proposal.criadoEm,
     ),
     neighborhoods: [...store.neighborhoods],
     forks: sortByDateDesc(store.forks, (fork) => fork.criadoEm),
-    activities: address
+    activities: resolvedAddress
       ? sortByDateDesc(
-          store.activities.filter((activity) => sameAddress(activity.address, address)),
+          store.activities.filter((activity) => sameAddress(activity.address, resolvedAddress)),
           (activity) => activity.data,
         )
       : [],
-    profile: buildProfile(store, address),
+    profile: buildProfile(store, resolvedAddress),
+    events: sortByDateDesc(store.events, (event) => event.occurredAt).slice(0, 40),
     feed: buildFeed(store),
   };
 }
@@ -67,7 +79,13 @@ export function connectSession(store, { address, demo }) {
 }
 
 export function issueCitizenship(store, input) {
+  ensureStoreCollections(store);
   const address = must(input.address?.trim(), 'Endereco de carteira obrigatorio.');
+  const authority = authorizeAction(store, {
+    action: 'solicitar_cidadania',
+    address,
+  });
+  must(authority.allowed, authority.reason);
   const neighborhood = must(
     findNeighborhood(store, input.bairroId),
     'Bairro selecionado nao encontrado.',
@@ -113,10 +131,29 @@ export function issueCitizenship(store, input) {
     lida: false,
   });
 
+  recordDomainEvent(store, {
+    type: 'CitizenIssued',
+    actorAddress: address,
+    entityType: 'cidadania',
+    entityId: citizen.address,
+    occurredAt: createdAt,
+    payload: {
+      bairroId: neighborhood.id,
+      bairroNome: neighborhood.nome,
+      nivel: citizen.nivel,
+    },
+  });
+
   return { citizenAddress: address };
 }
 
 export function createProposal(store, input) {
+  ensureStoreCollections(store);
+  const authority = authorizeAction(store, {
+    action: 'propor',
+    address: input.authorAddress,
+  });
+  must(authority.allowed, authority.reason);
   const citizen = must(
     findCitizen(store, input.authorAddress),
     'Somente cidadaos verificados podem publicar propostas.',
@@ -124,43 +161,100 @@ export function createProposal(store, input) {
   must(citizen.ativo, 'A cidadania desta carteira nao esta ativa.');
 
   const law = must(findLaw(store, input.lawId), 'Lei nao encontrada.');
-  const article = must(
-    law.artigos.find((item) => item.id === input.articleId),
-    'Artigo nao encontrado.',
-  );
+  const kind = resolveProposalKind(input);
   const title = sanitizeText(input.title);
   const justification = sanitizeText(input.justification);
-  const newText = sanitizeText(input.newText);
   must(title.length >= 12, 'O titulo da proposta precisa ser mais descritivo.');
   must(
     justification.length >= 24,
     'Explique melhor a justificativa territorial e legislativa da proposta.',
   );
-  must(newText.length >= 40, 'A proposta precisa de uma comparacao textual completa.');
-
-  const rawImpactedNeighborhoodIds =
-    input.impactedNeighborhoodIds?.length > 0
-      ? input.impactedNeighborhoodIds
-      : [citizen.bairroId];
-  const impactedNeighborhoodIds = [...new Set(rawImpactedNeighborhoodIds)];
-
-  must(
-    impactedNeighborhoodIds.every((neighborhoodId) => Boolean(findNeighborhood(store, neighborhoodId))),
-    'Existem bairros impactados invalidos na proposta.',
-  );
-
-  const ci = evaluateCi(law, article, newText);
-  const status = ci.conflito && ci.constitucional ? 'aberto' : 'em-revisao';
   const createdAt = nowIso();
   const fork = store.forks.find((item) => item.leiForkId === law.id);
+  let article = null;
+  let newText;
+  let impactedNeighborhoodIds;
+  let ci;
+  let initialState;
+  let quorum;
+  let variationDraft;
+
+  if (kind === 'variacao_local') {
+    must(
+      !law.isFork,
+      'A autorizacao de variacao territorial deve partir de uma lei base municipal.',
+    );
+    must(
+      !store.forks.some(
+        (item) => item.leiOrigemId === law.id && item.bairroId === citizen.bairroId,
+      ),
+      'Ja existe uma variacao territorial aberta para esta lei e este bairro.',
+    );
+
+    const draftName = sanitizeText(input.variationDraft?.name || title);
+    const draftObjective = sanitizeText(input.variationDraft?.objective || justification);
+    const draftDurationMonths = Number(input.variationDraft?.durationMonths || 0);
+
+    must(draftName.length >= 8, 'Informe um nome claro para a variacao territorial.');
+    must(
+      draftObjective.length >= 24,
+      'Descreva melhor o objetivo administrativo da variacao territorial.',
+    );
+    must(
+      draftDurationMonths > 0,
+      'Informe uma duracao valida para a variacao territorial.',
+    );
+
+    impactedNeighborhoodIds = [citizen.bairroId];
+    ci = {
+      conflito: true,
+      orcamento: true,
+      constitucional: true,
+      redacao: true,
+    };
+    quorum = 1.2;
+    variationDraft = {
+      nome: draftName,
+      slug: slugify(input.variationDraft?.slug || draftName),
+      objetivo: draftObjective,
+      duracaoMeses: draftDurationMonths,
+      bairroId: citizen.bairroId,
+      bairroNome: citizen.bairroNome,
+    };
+  } else {
+    article = must(
+      law.artigos.find((item) => item.id === input.articleId),
+      'Artigo nao encontrado.',
+    );
+    newText = sanitizeText(input.newText);
+    must(newText.length >= 40, 'A proposta precisa de uma comparacao textual completa.');
+
+    const rawImpactedNeighborhoodIds =
+      input.impactedNeighborhoodIds?.length > 0
+        ? input.impactedNeighborhoodIds
+        : [citizen.bairroId];
+    impactedNeighborhoodIds = [...new Set(rawImpactedNeighborhoodIds)];
+
+    must(
+      impactedNeighborhoodIds.every((neighborhoodId) => Boolean(findNeighborhood(store, neighborhoodId))),
+      'Existem bairros impactados invalidos na proposta.',
+    );
+
+    ci = evaluateCi(law, article, newText);
+    quorum = law.isFork ? 1.2 : 2;
+  }
+
+  initialState = determineInitialProposalState({ kind, ci });
+
   const proposal = {
     id: nextNumericId('pr', store.proposals),
+    kind,
     titulo: title,
     leiAlvoId: law.id,
     leiAlvoNome: law.titulo,
-    artigoAlvoId: article.id,
-    artigoAlvoRotulo: article.rotulo,
-    status,
+    artigoAlvoId: article?.id,
+    artigoAlvoRotulo: article?.rotulo,
+    status: initialState.status,
     autor: citizen.address,
     bairroId: citizen.bairroId,
     bairroNome: citizen.bairroNome,
@@ -171,9 +265,9 @@ export function createProposal(store, input) {
     txHash: createHash(),
     impactedNeighborhoodIds,
     ci,
-    oldText: article.texto,
+    oldText: article?.texto,
     newText,
-    quorum: law.isFork ? 1.2 : 2,
+    quorum,
     votingEndsAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
     closedAt: undefined,
     resolutionReason: undefined,
@@ -181,9 +275,47 @@ export function createProposal(store, input) {
     comments: [],
     forkId: fork?.id,
     source: law.isFork ? 'fork' : 'municipal',
+    variationDraft,
   };
 
   store.proposals.push(proposal);
+  recordDomainEvent(store, {
+    type: 'ProposalCreated',
+    actorAddress: citizen.address,
+    entityType: 'proposta',
+    entityId: proposal.id,
+    occurredAt: createdAt,
+    payload: {
+      leiId: proposal.leiAlvoId,
+      artigoId: proposal.artigoAlvoId ?? null,
+      status: proposal.status,
+      kind,
+      impactedNeighborhoodIds,
+      variationDraft:
+        kind === 'variacao_local'
+          ? {
+              bairroId: variationDraft?.bairroId,
+              duracaoMeses: variationDraft?.duracaoMeses,
+            }
+          : null,
+    },
+  });
+  recordDomainEvent(store, {
+    type:
+      initialState.transition.key === 'initial_to_open'
+        ? 'ProposalOpenedForVoting'
+        : 'ProposalMovedToReview',
+    actorAddress: citizen.address,
+    entityType: 'proposta',
+    entityId: proposal.id,
+    occurredAt: createdAt,
+    payload: {
+      leiId: proposal.leiAlvoId,
+      status: proposal.status,
+      kind,
+    },
+  });
+
   if (fork) {
     fork.proposalIds = [...new Set([...(fork.proposalIds ?? []), proposal.id])];
   }
@@ -208,27 +340,19 @@ export function createProposal(store, input) {
 }
 
 export function voteOnProposal(store, proposalId, input) {
+  ensureStoreCollections(store);
   syncProposalLifecycles(store);
   const proposal = must(findProposal(store, proposalId), 'Proposta nao encontrada.');
   const citizen = must(
     findCitizen(store, input.address),
     'Somente cidadaos verificados podem votar.',
   );
-  must(citizen.ativo, 'A cidadania desta carteira nao esta ativa.');
-  must(
-    proposal.status === 'aberto',
-    proposal.status === 'em-revisao'
-      ? 'Esta proposta ainda nao liberou a etapa de votacao.'
-      : 'Esta proposta ja foi encerrada.',
-  );
-  must(
-    !proposalDeadlineReached(proposal),
-    'O prazo de votacao desta proposta foi encerrado.',
-  );
-  must(
-    !proposal.votes.some((vote) => sameAddress(vote.address, citizen.address)),
-    'Sua carteira ja votou nesta proposta.',
-  );
+  const authority = authorizeAction(store, {
+    action: 'votar',
+    address: input.address,
+    proposal,
+  });
+  must(authority.allowed, authority.reason);
 
   const choice = must(input.choice, 'Escolha um voto valido.');
   must(
@@ -248,18 +372,38 @@ export function voteOnProposal(store, proposalId, input) {
     createdAt: timestamp,
   });
 
+  recordDomainEvent(store, {
+    type: 'VoteCast',
+    actorAddress: citizen.address,
+    entityType: 'proposta',
+    entityId: proposal.id,
+    occurredAt: timestamp,
+    payload: {
+      choice,
+      weight,
+      bairroId: citizen.bairroId,
+    },
+  });
+
   resolveProposalStatus(store, proposal);
 
   return { proposal: buildProposalView(store, proposal, citizen.address) };
 }
 
 export function addProposalComment(store, proposalId, input) {
+  ensureStoreCollections(store);
   syncProposalLifecycles(store);
   const proposal = must(findProposal(store, proposalId), 'Proposta nao encontrada.');
   const citizen = must(
     findCitizen(store, input.authorAddress),
     'Somente cidadaos verificados podem comentar.',
   );
+  const authority = authorizeAction(store, {
+    action: 'comentar',
+    address: input.authorAddress,
+    proposal,
+  });
+  must(authority.allowed, authority.reason);
 
   const body = sanitizeText(input.body);
   must(body.length >= 8, 'Escreva um comentario mais completo antes de publicar.');
@@ -270,6 +414,18 @@ export function addProposalComment(store, proposalId, input) {
     authorAddress: citizen.address,
     createdAt: timestamp,
     body,
+  });
+
+  recordDomainEvent(store, {
+    type: 'CommentAdded',
+    actorAddress: citizen.address,
+    entityType: 'comentario',
+    entityId: proposal.id,
+    occurredAt: timestamp,
+    payload: {
+      proposalId: proposal.id,
+      bodyPreview: body.slice(0, 120),
+    },
   });
 
   if (!sameAddress(citizen.address, proposal.autor)) {
@@ -288,43 +444,66 @@ export function addProposalComment(store, proposalId, input) {
 }
 
 export function markAllActivitiesRead(store, address) {
+  ensureStoreCollections(store);
   store.activities.forEach((activity) => {
     if (sameAddress(activity.address, address)) {
       activity.lida = true;
     }
   });
 
+  if (address) {
+    recordDomainEvent(store, {
+      type: 'ActivitiesMarkedRead',
+      actorAddress: address,
+      entityType: 'atividade',
+      entityId: address,
+      payload: {},
+    });
+  }
+
   return { ok: true };
 }
 
 export function createFork(store, input) {
+  ensureStoreCollections(store);
   syncProposalLifecycles(store);
   const citizen = must(
     findCitizen(store, input.authorAddress),
     'Somente cidadaos verificados podem abrir variacoes locais.',
   );
-  must(citizen.ativo, 'A cidadania desta carteira nao esta ativa.');
-  must(
-    citizen.bairroId === input.bairroId,
-    'A variacao precisa ser criada para o bairro da cidadania ativa.',
+  const sourceProposal = must(
+    findProposal(store, input.sourceProposalId),
+    'Proposta de autorizacao da variacao nao encontrada.',
   );
-
-  const law = must(findLaw(store, input.lawId), 'Lei base nao encontrada.');
-  const neighborhood = must(findNeighborhood(store, input.bairroId), 'Bairro nao encontrado.');
+  must(
+    isVariationAuthorizationProposal(sourceProposal),
+    'A ativacao da variacao depende de uma proposta territorial de autorizacao.',
+  );
+  const law = must(findLaw(store, sourceProposal.leiAlvoId), 'Lei base nao encontrada.');
+  const draft = must(
+    sourceProposal.variationDraft,
+    'A proposta aprovada nao traz os dados da variacao territorial.',
+  );
+  const neighborhood = must(
+    findNeighborhood(store, draft.bairroId),
+    'Bairro da variacao territorial nao encontrado.',
+  );
+  const authority = authorizeAction(store, {
+    action: 'criar_variacao',
+    address: input.authorAddress,
+    proposal: sourceProposal,
+    law,
+    bairroId: neighborhood.id,
+  });
+  must(authority.allowed, authority.reason);
 
   must(
     !store.forks.some(
       (fork) =>
-        fork.leiOrigemId === law.id &&
-        fork.bairroId === neighborhood.id &&
-        fork.status === 'ativo',
+        fork.sourceProposalId === sourceProposal.id ||
+        (fork.leiOrigemId === law.id && fork.bairroId === neighborhood.id),
     ),
-    'Ja existe uma variacao ativa desta lei para o seu bairro.',
-  );
-
-  must(
-    Number(input.durationMonths || 0) > 0,
-    'Informe uma duracao valida para o experimento local.',
+    'Ja existe uma variacao territorial registrada para esta lei e este bairro.',
   );
 
   const createdAt = nowIso();
@@ -336,7 +515,7 @@ export function createFork(store, input) {
     categoria: law.categoria,
     versao: '1.0.0',
     atualizadaEm: createdAt,
-    resumo: sanitizeText(input.objective),
+    resumo: draft.objetivo,
     isFork: true,
     bairroId: neighborhood.id,
     bairroNome: neighborhood.nome,
@@ -354,11 +533,11 @@ export function createFork(store, input) {
     id: nextNumericId('commit', store.commits),
     leiId: forkLaw.id,
     hash: createHash(),
-    mensagem: `Inicializa variacao local ${sanitizeText(input.name)}`,
+    mensagem: `Inicializa variacao local ${draft.nome}`,
     autor: citizen.address,
     timestamp: createdAt,
     versao: forkLaw.versao,
-    resumo: sanitizeText(input.objective),
+    resumo: draft.objetivo,
     articleChanges: [],
   };
 
@@ -370,24 +549,39 @@ export function createFork(store, input) {
 
   const fork = {
     id: nextNumericId('fork', store.forks),
-    slug: slugify(input.name),
-    nome: sanitizeText(input.name),
+    slug: draft.slug,
+    nome: draft.nome,
     bairroId: neighborhood.id,
     bairroNome: neighborhood.nome,
     leiOrigemId: law.id,
     leiForkId: forkLaw.id,
-    objetivo: sanitizeText(input.objective),
-    duracaoMeses: Number(input.durationMonths || 6),
+    objetivo: draft.objetivo,
+    duracaoMeses: draft.duracaoMeses,
     criadoEm: createdAt,
     autor: citizen.address,
     status: 'ativo',
     participantes: 1,
     proposalIds: [],
+    sourceProposalId: sourceProposal.id,
   };
 
   store.commits.push(commit);
   store.laws.push(forkLaw);
   store.forks.push(fork);
+
+  recordDomainEvent(store, {
+    type: 'LocalVariationOpened',
+    actorAddress: citizen.address,
+    entityType: 'variacao',
+    entityId: fork.id,
+    occurredAt: createdAt,
+    payload: {
+      bairroId: neighborhood.id,
+      leiOrigemId: law.id,
+      leiForkId: forkLaw.id,
+      sourceProposalId: sourceProposal.id,
+    },
+  });
 
   store.citizens
     .filter((recipient) => recipient.bairroId === neighborhood.id)

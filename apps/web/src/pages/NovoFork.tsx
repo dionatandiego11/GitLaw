@@ -8,7 +8,7 @@ export function NovoFork() {
   const navigate = useNavigate();
   const params = useParams();
   const [searchParams] = useSearchParams();
-  const { laws, currentCitizen, createFork } = useApp();
+  const { laws, currentCitizen, createProposal } = useApp();
   const [step, setStep] = useState(1);
   const [isCreating, setIsCreating] = useState(false);
   const [lawId, setLawId] = useState(params.id ?? searchParams.get('sourceLawId') ?? '');
@@ -43,7 +43,7 @@ export function NovoFork() {
 
   const handleCreate = async () => {
     if (!selectedLaw || !currentCitizen) {
-      setError('Cidadania ativa e lei base são obrigatórias para criar uma variação.');
+      setError('Cidadania ativa e lei base são obrigatórias para propor uma variação.');
       return;
     }
 
@@ -51,15 +51,21 @@ export function NovoFork() {
     setError(null);
 
     try {
-      await createFork({
+      const proposal = await createProposal({
+        kind: 'variacao_local',
         lawId: selectedLaw.id,
-        name,
-        objective,
-        durationMonths,
+        title: `Autoriza variação local de ${selectedLaw.titulo} em ${currentCitizen.bairroNome}`,
+        justification: objective,
+        impactedNeighborhoodIds: [currentCitizen.bairroId],
+        variationDraft: {
+          name,
+          objective,
+          durationMonths,
+        },
       });
-      navigate(`/bairros/${currentCitizen.bairroId}`);
+      navigate(`/propostas/${proposal.id}`);
     } catch (nextError) {
-      setError(nextError instanceof Error ? nextError.message : 'Não foi possível iniciar a variação.');
+      setError(nextError instanceof Error ? nextError.message : 'Não foi possível publicar a autorização da variação.');
     } finally {
       setIsCreating(false);
     }
@@ -69,8 +75,8 @@ export function NovoFork() {
     return (
       <div className="p-4">
         <div className="rounded-2xl border border-[var(--color-git-border)] bg-[var(--color-git-bg2)] p-6 text-center space-y-3">
-          <h1 className="text-lg font-semibold text-[var(--color-git-text)]">Cidadania obrigatória para criar variações</h1>
-          <p className="text-sm text-[var(--color-git-muted)]">A variação local depende de uma identidade ativa para registrar autoria e delimitar o território do experimento.</p>
+          <h1 className="text-lg font-semibold text-[var(--color-git-text)]">Cidadania obrigatória para propor variações</h1>
+          <p className="text-sm text-[var(--color-git-muted)]">A variação local precisa de autoria territorial ativa para abrir a etapa de autorização pública.</p>
           <Link to="/connect" className="inline-flex items-center justify-center px-4 py-2 bg-[var(--color-git-blue)] text-white rounded-xl text-sm font-medium">
             Conectar carteira
           </Link>
@@ -90,7 +96,7 @@ export function NovoFork() {
           <ArrowLeft className="w-5 h-5" />
         </button>
         <div className="flex-1 min-w-0">
-          <h1 className="text-sm font-semibold truncate text-[var(--color-git-text)]">Criar variação local</h1>
+          <h1 className="text-sm font-semibold truncate text-[var(--color-git-text)]">Propor variação local</h1>
           <div className="text-[10px] font-mono text-[var(--color-git-muted)]">Passo {step} de 2</div>
         </div>
       </div>
@@ -125,7 +131,7 @@ export function NovoFork() {
               <div className="text-sm text-[var(--color-git-text)]">
                 <p className="font-medium mb-1">O que é uma variação local?</p>
                 <p className="text-xs text-[var(--color-git-muted)] leading-relaxed">
-                  Uma variação cria uma cópia local da legislação municipal para experimentação no território. As regras alteradas aqui valerão apenas para o seu bairro durante o período de teste.
+                  A variação local nasce em duas etapas: primeiro o bairro autoriza a abertura do experimento; depois a versão territorial é ativada com base nessa aprovação.
                 </p>
               </div>
             </div>
@@ -152,7 +158,7 @@ export function NovoFork() {
 
         {step === 2 && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
-            <h2 className="text-lg font-semibold text-[var(--color-git-text)]">Detalhes do Experimento</h2>
+            <h2 className="text-lg font-semibold text-[var(--color-git-text)]">Termos da autorização</h2>
             
             <div className="space-y-3">
               <div>
@@ -175,9 +181,9 @@ export function NovoFork() {
             <div className="bg-[rgba(255,123,114,0.1)] border border-[rgba(255,123,114,0.3)] rounded-xl p-4 flex items-start gap-3">
                 <AlertTriangle className="w-5 h-5 text-[#ff7b72] shrink-0 mt-0.5" />
                 <div className="text-sm text-[var(--color-git-text)]">
-                  <p className="font-medium mb-1 text-[#ff7b72]">Atenção</p>
+                  <p className="font-medium mb-1 text-[#ff7b72]">Fluxo institucional</p>
                   <p className="text-xs text-[var(--color-git-muted)] leading-relaxed">
-                    A criação da variação requer aprovação de 10% dos residentes do bairro. Após criada, as alterações propostas nesta variação só terão validade legal no perímetro do bairro.
+                    Este envio ainda não cria a variação. Ele publica a proposta de autorização territorial. Se ela for aprovada, o bairro poderá ativar a versão local da lei.
                   </p>
                 </div>
               </div>
@@ -204,10 +210,10 @@ export function NovoFork() {
               className="w-full py-3 bg-[var(--color-git-purple)] hover:opacity-90 text-white rounded-xl font-medium transition-opacity text-sm border border-[rgba(137,87,229,0.5)] flex items-center justify-center gap-2 disabled:opacity-50"
             >
               {isCreating ? (
-                <span className="animate-pulse">Criando variação...</span>
+                <span className="animate-pulse">Publicando autorização...</span>
               ) : (
                 <>
-                  <GitFork className="w-4 h-4" /> Iniciar variação
+                  <GitFork className="w-4 h-4" /> Publicar autorização
                 </>
               )}
             </button>

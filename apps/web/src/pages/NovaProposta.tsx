@@ -65,13 +65,13 @@ export function NovaProposta() {
     }
 
     setLawId((current) => current || sourceProposal.leiAlvoId);
-    setArticleId((current) => current || sourceProposal.artigoAlvoId);
+    setArticleId((current) => current || sourceProposal.artigoAlvoId || '');
     setIssueId((current) => current || sourceProposal.issueId || '');
     setUrgency((current) => current || sourceProposal.urgencia);
     setImpactedNeighborhoodIds((current) =>
       current.length > 0 ? current : sourceProposal.impactedNeighborhoodIds,
     );
-    setNewText((current) => current || sourceProposal.newText);
+    setNewText((current) => current || sourceProposal.newText || '');
     setTitle((current) =>
       current || `Nova versão de ${sourceProposal.id}: ${sourceProposal.titulo}`,
     );

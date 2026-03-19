@@ -1,0 +1,71 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  
+  /* Premium Dark Theme Core Spaces */
+  --color-git-bg: #05080f;
+  --color-git-bg2: #0b1120;
+  --color-git-bg3: #131b2f;
+  
+  /* Premium Borders */
+  --color-git-border: rgba(255, 255, 255, 0.05);
+  --color-git-border2: rgba(255, 255, 255, 0.12);
+  --color-git-border-glow: rgba(88, 166, 255, 0.3);
+  
+  /* Typography */
+  --color-git-text: #f0f6fc;
+  --color-git-muted: #8b949e;
+  
+  /* Neon Accents */
+  --color-git-blue: #38bdf8;
+  --color-git-blue-glow: rgba(56, 189, 248, 0.5);
+  --color-git-green: #34d399;
+  --color-git-green-glow: rgba(52, 211, 153, 0.3);
+  --color-git-amber: #fbbf24;
+  --color-git-red: #f87171;
+  --color-git-purple: #c084fc;
+  --color-git-purple-glow: rgba(192, 132, 252, 0.4);
+
+  /* Animation Utilities */
+  --animate-blob: blob 7s infinite;
+  --animate-fade-in-up: fadeInUp 0.5s ease-out forwards;
+
+  @keyframes blob {
+    0% { transform: translate(0px, 0px) scale(1); }
+    33% { transform: translate(30px, -50px) scale(1.1); }
+    66% { transform: translate(-20px, 20px) scale(0.9); }
+    100% { transform: translate(0px, 0px) scale(1); }
+  }
+
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+}
+
+@layer base {
+  body {
+    background-color: var(--color-git-bg);
+    color: var(--color-git-text);
+    @apply antialiased selection:bg-git-blue selection:text-white;
+  }
+}
+
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .glass-panel {
+    @apply bg-white/[0.02] backdrop-blur-xl border border-white/[0.05] shadow-2xl;
+  }
+  .hover-glow {
+    @apply transition-all duration-300 hover:shadow-[0_0_20px_var(--color-git-blue-glow)] hover:border-[var(--color-git-border-glow)];
+  }
+}

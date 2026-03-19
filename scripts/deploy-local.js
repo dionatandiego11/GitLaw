@@ -6,9 +6,14 @@ import { network } from "hardhat";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const projectRoot = path.resolve(__dirname, "..");
+const dataDir = process.env.GITLAW_DATA_DIR
+  ? path.resolve(projectRoot, process.env.GITLAW_DATA_DIR)
+  : path.join(projectRoot, "data");
 
 async function writeJson(relativePath, value) {
-  const targetPath = path.join(projectRoot, relativePath);
+  const targetPath = path.isAbsolute(relativePath)
+    ? relativePath
+    : path.join(projectRoot, relativePath);
   await fs.mkdir(path.dirname(targetPath), { recursive: true });
   await fs.writeFile(targetPath, `${JSON.stringify(value, null, 2)}\n`, "utf8");
 }
@@ -53,6 +58,6 @@ const deploymentSnapshot = {
   },
 };
 
-await writeJson("data/chain.deployment.json", deploymentSnapshot);
+await writeJson(path.join(dataDir, "chain.deployment.json"), deploymentSnapshot);
 
 console.log(JSON.stringify(deploymentSnapshot, null, 2));

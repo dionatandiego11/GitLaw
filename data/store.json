@@ -61,33 +61,54 @@
       "verificadoEm": "2026-01-18T11:00:00Z"
     },
     {
-      "address": "0x12aB34567890abCDef1234567890abCDef123456",
+      "address": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
       "bairroId": "conceicao-itagua",
       "bairroNome": "Conceicao de Itagua",
       "nivel": 2,
       "emitidoEm": "2026-01-20T09:30:00Z",
       "ativo": true,
       "verificadoEm": "2026-01-20T09:30:00Z"
+    },
+    {
+      "address": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+      "bairroId": "corrego-feijao",
+      "bairroNome": "Corrego do Feijao",
+      "nivel": 1,
+      "emitidoEm": "2026-03-19T17:07:29.501Z",
+      "ativo": true,
+      "verificadoEm": "2026-03-19T17:07:29.501Z"
     }
   ],
-  "citizenshipRequests": [],
+  "citizenshipRequests": [
+    {
+      "id": "request-001",
+      "address": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+      "bairroId": "corrego-feijao",
+      "bairroNome": "Corrego do Feijao",
+      "documentName": "comprovante-residencia.pdf",
+      "documentType": "application/pdf",
+      "documentSize": 245760,
+      "status": "emitido",
+      "createdAt": "2026-03-19T17:07:29.501Z"
+    }
+  ],
   "laws": [
     {
       "id": "lei-1",
       "titulo": "Plano Diretor Estrategico",
       "numero": "Lei Complementar 105/2014",
       "categoria": "urbanismo",
-      "versao": "4.2.0",
-      "atualizadaEm": "2026-02-15T10:00:00Z",
+      "versao": "4.2.1",
+      "atualizadaEm": "2026-03-19T17:07:33.619Z",
       "resumo": "Define diretrizes de uso e ocupacao do solo do municipio com trilha completa de versoes.",
       "artigos": [
         {
           "id": "lei-1-art-1",
           "rotulo": "Art. 1o",
-          "texto": "Esta Lei orienta o desenvolvimento urbano de Brumadinho, equilibrando habitacao, mobilidade, atividade economica e preservacao ambiental.",
-          "ultimaAtualizacaoEm": "2026-01-10T10:00:00Z",
-          "ultimoAutor": "0xPrefeituraBrumadinho000000000000000000000001",
-          "ultimoCommitId": "commit-001"
+          "texto": "O Poder Executivo publicará relatório trimestral, em linguagem simples e acesso aberto, com mapa por bairro das revisões e decisões urbanísticas relacionadas a este plano.",
+          "ultimaAtualizacaoEm": "2026-03-19T17:07:33.619Z",
+          "ultimoAutor": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+          "ultimoCommitId": "commit-008"
         },
         {
           "id": "lei-1-art-2",
@@ -99,7 +120,8 @@
         }
       ],
       "commitIds": [
-        "commit-001"
+        "commit-001",
+        "commit-008"
       ]
     },
     {
@@ -146,7 +168,7 @@
           "rotulo": "Art. 8o",
           "texto": "O Municipio podera incentivar boas praticas ambientais por meio de programas de educacao, certificacao voluntaria e isencao parcial de IPTU para imoveis com captacao de agua da chuva, nos termos do regulamento.",
           "ultimaAtualizacaoEm": "2026-03-01T09:15:00Z",
-          "ultimoAutor": "0x12aB34567890abCDef1234567890abCDef123456",
+          "ultimoAutor": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
           "ultimoCommitId": "commit-006"
         },
         {
@@ -168,17 +190,17 @@
       "titulo": "Estatuto do Pedestre",
       "numero": "Lei 16.673/2017",
       "categoria": "transporte",
-      "versao": "1.0.3",
-      "atualizadaEm": "2026-01-14T13:45:00Z",
+      "versao": "1.0.4",
+      "atualizadaEm": "2026-03-19T14:04:13.342Z",
       "resumo": "Garante prioridade, seguranca e conforto ao pedestre com votacao rastreavel por proposta.",
       "artigos": [
         {
           "id": "lei-4-art-4",
           "rotulo": "Art. 4o",
-          "texto": "A largura minima das calcadas sera de 1,20m, observadas as condicoes de seguranca e acessibilidade fixadas em regulamento.",
-          "ultimaAtualizacaoEm": "2026-01-14T13:45:00Z",
-          "ultimoAutor": "0xPrefeituraBrumadinho000000000000000000000001",
-          "ultimoCommitId": "commit-003"
+          "texto": "A largura minima das calcadas sera de 2,00m em vias arteriais e de 1,50m nas demais vias, observadas as condicoes de seguranca e acessibilidade fixadas em regulamento.",
+          "ultimaAtualizacaoEm": "2026-03-19T14:04:13.342Z",
+          "ultimoAutor": "0x71bE63f3384f5fb98995898A86B02Fb2426c5788",
+          "ultimoCommitId": "commit-007"
         },
         {
           "id": "lei-4-art-7",
@@ -190,7 +212,8 @@
         }
       ],
       "commitIds": [
-        "commit-003"
+        "commit-003",
+        "commit-007"
       ]
     },
     {
@@ -225,6 +248,40 @@
       ],
       "commitIds": [
         "commit-005"
+      ]
+    },
+    {
+      "id": "lei-fork-002",
+      "titulo": "Politica Municipal de Meio Ambiente (Variacao Sape)",
+      "numero": "Exp-002/Sape",
+      "categoria": "meio-ambiente",
+      "versao": "1.0.0",
+      "atualizadaEm": "2026-03-19T17:07:39.958Z",
+      "resumo": "Permitir experimento territorial com regras operacionais de recuperação ambiental, registro público dos efeitos e revisão periódica dos resultados locais.",
+      "isFork": true,
+      "bairroId": "sape",
+      "bairroNome": "Sape",
+      "leiOrigemId": "lei-3",
+      "artigos": [
+        {
+          "id": "lei-fork-002-lei-3-art-8",
+          "rotulo": "Art. 8o",
+          "texto": "O Municipio podera incentivar boas praticas ambientais por meio de programas de educacao, certificacao voluntaria e isencao parcial de IPTU para imoveis com captacao de agua da chuva, nos termos do regulamento.",
+          "ultimaAtualizacaoEm": "2026-03-19T17:07:39.958Z",
+          "ultimoAutor": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+          "ultimoCommitId": "commit-009"
+        },
+        {
+          "id": "lei-fork-002-lei-3-art-14",
+          "rotulo": "Art. 14",
+          "texto": "Projetos de recuperacao ambiental em areas sensiveis deverao prever monitoramento publico dos indicadores de solo e agua.",
+          "ultimaAtualizacaoEm": "2026-03-19T17:07:39.958Z",
+          "ultimoAutor": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+          "ultimoCommitId": "commit-009"
+        }
+      ],
+      "commitIds": [
+        "commit-009"
       ]
     }
   ],
@@ -290,7 +347,7 @@
       "prId": "pr-103",
       "hash": "0x11a44c77e",
       "mensagem": "Cria incentivo para captacao de agua da chuva",
-      "autor": "0x12aB34567890abCDef1234567890abCDef123456",
+      "autor": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
       "timestamp": "2026-03-01T09:15:00Z",
       "versao": "1.8.2",
       "resumo": "Aprovacao municipal do incentivo fiscal para imoveis com captacao de agua da chuva.",
@@ -302,11 +359,61 @@
           "after": "O Municipio podera incentivar boas praticas ambientais por meio de programas de educacao, certificacao voluntaria e isencao parcial de IPTU para imoveis com captacao de agua da chuva, nos termos do regulamento."
         }
       ]
+    },
+    {
+      "id": "commit-007",
+      "leiId": "lei-4",
+      "prId": "pr-102",
+      "hash": "0x0b4a2760d0aa",
+      "mensagem": "Amplia largura minima em vias arteriais",
+      "autor": "0x71bE63f3384f5fb98995898A86B02Fb2426c5788",
+      "timestamp": "2026-03-19T14:04:13.342Z",
+      "versao": "1.0.4",
+      "resumo": "Adequar calcadas de vias arteriais ao fluxo de pedestres e a parametros minimos de acessibilidade urbana.",
+      "articleChanges": [
+        {
+          "articleId": "lei-4-art-4",
+          "rotulo": "Art. 4o",
+          "before": "A largura minima das calcadas sera de 1,20m, observadas as condicoes de seguranca e acessibilidade fixadas em regulamento.",
+          "after": "A largura minima das calcadas sera de 2,00m em vias arteriais e de 1,50m nas demais vias, observadas as condicoes de seguranca e acessibilidade fixadas em regulamento."
+        }
+      ]
+    },
+    {
+      "id": "commit-008",
+      "leiId": "lei-1",
+      "prId": "pr-202",
+      "hash": "0xdf0ec7e3257d",
+      "mensagem": "Amplia transparência territorial das revisões do Plano Diretor",
+      "autor": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+      "timestamp": "2026-03-19T17:07:33.619Z",
+      "versao": "4.2.1",
+      "resumo": "Padroniza a publicação periódica de revisões urbanas em linguagem simples, com foco específico em bairros sob pressão territorial.",
+      "articleChanges": [
+        {
+          "articleId": "lei-1-art-1",
+          "rotulo": "Art. 1o",
+          "before": "Esta Lei orienta o desenvolvimento urbano de Brumadinho, equilibrando habitacao, mobilidade, atividade economica e preservacao ambiental.",
+          "after": "O Poder Executivo publicará relatório trimestral, em linguagem simples e acesso aberto, com mapa por bairro das revisões e decisões urbanísticas relacionadas a este plano."
+        }
+      ]
+    },
+    {
+      "id": "commit-009",
+      "leiId": "lei-fork-002",
+      "hash": "0x457d3a5ca326",
+      "mensagem": "Inicializa variacao local Protocolo Verde - Sapé",
+      "autor": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "timestamp": "2026-03-19T17:07:39.958Z",
+      "versao": "1.0.0",
+      "resumo": "Permitir experimento territorial com regras operacionais de recuperação ambiental, registro público dos efeitos e revisão periódica dos resultados locais.",
+      "articleChanges": []
     }
   ],
   "proposals": [
     {
       "id": "pr-101",
+      "kind": "emenda",
       "titulo": "Exige cobertura vegetal em novos comercios",
       "leiAlvoId": "lei-2",
       "leiAlvoNome": "Codigo de Obras e Edificacoes",
@@ -345,7 +452,7 @@
           "createdAt": "2026-03-15T09:00:00Z"
         },
         {
-          "address": "0x12aB34567890abCDef1234567890abCDef123456",
+          "address": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
           "choice": "contra",
           "weight": 0.3,
           "bairroId": "conceicao-itagua",
@@ -365,12 +472,13 @@
     },
     {
       "id": "pr-102",
+      "kind": "emenda",
       "titulo": "Amplia largura minima em vias arteriais",
       "leiAlvoId": "lei-4",
       "leiAlvoNome": "Estatuto do Pedestre",
       "artigoAlvoId": "lei-4-art-4",
       "artigoAlvoRotulo": "Art. 4o",
-      "status": "aberto",
+      "status": "aprovado",
       "autor": "0x71bE63f3384f5fb98995898A86B02Fb2426c5788",
       "bairroId": "centro",
       "bairroNome": "Centro",
@@ -402,12 +510,20 @@
           "createdAt": "2026-03-16T15:00:00Z"
         },
         {
-          "address": "0x12aB34567890abCDef1234567890abCDef123456",
+          "address": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
           "choice": "contra",
           "weight": 0.6,
           "bairroId": "conceicao-itagua",
           "bairroNome": "Conceicao de Itagua",
           "createdAt": "2026-03-16T19:00:00Z"
+        },
+        {
+          "address": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+          "choice": "favor",
+          "weight": 0.6,
+          "bairroId": "sape",
+          "bairroNome": "Sape",
+          "createdAt": "2026-03-19T14:04:13.342Z"
         }
       ],
       "comments": [
@@ -418,17 +534,20 @@
           "body": "Teste local de comentario para validar a API."
         }
       ],
-      "source": "municipal"
+      "source": "municipal",
+      "closedAt": "2026-03-19T14:04:13.342Z",
+      "resolutionReason": "aprovado_por_quorum"
     },
     {
       "id": "pr-103",
+      "kind": "emenda",
       "titulo": "Incentiva captacao de agua da chuva",
       "leiAlvoId": "lei-3",
       "leiAlvoNome": "Politica Municipal de Meio Ambiente",
       "artigoAlvoId": "lei-3-art-8",
       "artigoAlvoRotulo": "Art. 8o",
       "status": "aprovado",
-      "autor": "0x12aB34567890abCDef1234567890abCDef123456",
+      "autor": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
       "bairroId": "conceicao-itagua",
       "bairroNome": "Conceicao de Itagua",
       "criadoEm": "2026-02-28T10:00:00Z",
@@ -452,7 +571,7 @@
       "votingEndsAt": "2026-03-14T10:00:00Z",
       "votes": [
         {
-          "address": "0x12aB34567890abCDef1234567890abCDef123456",
+          "address": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
           "choice": "favor",
           "weight": 1,
           "bairroId": "conceicao-itagua",
@@ -487,7 +606,65 @@
       "source": "municipal"
     },
     {
+      "id": "pr-104",
+      "kind": "variacao_local",
+      "titulo": "Autoriza variacao local do Codigo de Obras no Sape",
+      "leiAlvoId": "lei-2",
+      "leiAlvoNome": "Codigo de Obras e Edificacoes",
+      "status": "aprovado",
+      "autor": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "bairroId": "sape",
+      "bairroNome": "Sape",
+      "criadoEm": "2026-03-08T09:00:00Z",
+      "justificativa": "Autorizar experimento territorial para uso misto de baixo impacto no Sape, com duracao limitada e trilha publica de resultados.",
+      "issueId": "#variacao-001",
+      "urgencia": false,
+      "txHash": "0xvariacao104",
+      "impactedNeighborhoodIds": [
+        "sape"
+      ],
+      "ci": {
+        "conflito": true,
+        "orcamento": true,
+        "constitucional": true,
+        "redacao": true
+      },
+      "quorum": 1.2,
+      "votingEndsAt": "2026-03-09T20:00:00Z",
+      "closedAt": "2026-03-09T20:10:00Z",
+      "resolutionReason": "aprovado_por_quorum",
+      "votes": [
+        {
+          "address": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+          "choice": "favor",
+          "weight": 1,
+          "bairroId": "sape",
+          "bairroNome": "Sape",
+          "createdAt": "2026-03-08T11:00:00Z"
+        },
+        {
+          "address": "0x71bE63f3384f5fb98995898A86B02Fb2426c5788",
+          "choice": "favor",
+          "weight": 0.6,
+          "bairroId": "centro",
+          "bairroNome": "Centro",
+          "createdAt": "2026-03-08T13:30:00Z"
+        }
+      ],
+      "comments": [],
+      "source": "municipal",
+      "variationDraft": {
+        "nome": "Zoneamento Misto - Sape",
+        "slug": "sape-zoneamento-misto",
+        "objetivo": "Permitir comercio de baixo impacto em ruas residenciais para fortalecer a economia local sem perder controle urbano.",
+        "duracaoMeses": 6,
+        "bairroId": "sape",
+        "bairroNome": "Sape"
+      }
+    },
+    {
       "id": "pr-201",
+      "kind": "emenda",
       "titulo": "Nova versao: libera padarias de baixo impacto em vias locais",
       "leiAlvoId": "lei-fork-1",
       "leiAlvoNome": "Codigo de Obras (Variacao Sape)",
@@ -515,10 +692,178 @@
       "newText": "Fica permitido comercio de baixo impacto, incluindo padarias artesanais, mercearias e servicos de conveniencia de pequeno porte, em vias residenciais previamente definidas no plano local do experimento, mediante licenca simplificada.",
       "quorum": 1.2,
       "votingEndsAt": "2026-03-24T09:30:00Z",
-      "votes": [],
+      "votes": [
+        {
+          "address": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+          "choice": "favor",
+          "weight": 1,
+          "bairroId": "sape",
+          "bairroNome": "Sape",
+          "createdAt": "2026-03-19T17:30:54.850Z"
+        }
+      ],
       "comments": [],
       "forkId": "fork-1",
       "source": "fork"
+    },
+    {
+      "id": "pr-202",
+      "kind": "emenda",
+      "titulo": "Amplia transparência territorial das revisões do Plano Diretor",
+      "leiAlvoId": "lei-1",
+      "leiAlvoNome": "Plano Diretor Estrategico",
+      "artigoAlvoId": "lei-1-art-1",
+      "artigoAlvoRotulo": "Art. 1o",
+      "status": "aprovado",
+      "autor": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+      "bairroId": "corrego-feijao",
+      "bairroNome": "Corrego do Feijao",
+      "criadoEm": "2026-03-19T17:07:30.244Z",
+      "justificativa": "Padroniza a publicação periódica de revisões urbanas em linguagem simples, com foco específico em bairros sob pressão territorial.",
+      "issueId": "#fluxo-e2e-001",
+      "urgencia": false,
+      "txHash": "0xf568d1881c23",
+      "impactedNeighborhoodIds": [
+        "corrego-feijao"
+      ],
+      "ci": {
+        "conflito": true,
+        "orcamento": true,
+        "constitucional": true,
+        "redacao": true
+      },
+      "oldText": "Esta Lei orienta o desenvolvimento urbano de Brumadinho, equilibrando habitacao, mobilidade, atividade economica e preservacao ambiental.",
+      "newText": "O Poder Executivo publicará relatório trimestral, em linguagem simples e acesso aberto, com mapa por bairro das revisões e decisões urbanísticas relacionadas a este plano.",
+      "quorum": 2,
+      "votingEndsAt": "2026-04-02T17:07:30.245Z",
+      "votes": [
+        {
+          "address": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+          "choice": "favor",
+          "weight": 1,
+          "bairroId": "corrego-feijao",
+          "bairroNome": "Corrego do Feijao",
+          "createdAt": "2026-03-19T17:07:31.248Z"
+        },
+        {
+          "address": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+          "choice": "favor",
+          "weight": 0.6,
+          "bairroId": "sape",
+          "bairroNome": "Sape",
+          "createdAt": "2026-03-19T17:07:32.147Z"
+        },
+        {
+          "address": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+          "choice": "favor",
+          "weight": 0.6,
+          "bairroId": "conceicao-itagua",
+          "bairroNome": "Conceicao de Itagua",
+          "createdAt": "2026-03-19T17:07:33.619Z"
+        }
+      ],
+      "comments": [
+        {
+          "id": "comment-001",
+          "authorAddress": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+          "createdAt": "2026-03-19T17:07:31.139Z",
+          "body": "Comentário de teste institucional: a redação ficou clara e rastreável para acompanhamento por bairro."
+        }
+      ],
+      "source": "municipal",
+      "closedAt": "2026-03-19T17:07:33.619Z",
+      "resolutionReason": "aprovado_por_quorum"
+    },
+    {
+      "id": "pr-203",
+      "kind": "variacao_local",
+      "titulo": "Autoriza variação local de recuperação ambiental no Sapé",
+      "leiAlvoId": "lei-3",
+      "leiAlvoNome": "Politica Municipal de Meio Ambiente",
+      "status": "aprovado",
+      "autor": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "bairroId": "sape",
+      "bairroNome": "Sape",
+      "criadoEm": "2026-03-19T17:07:37.250Z",
+      "justificativa": "Abre autorização territorial temporária para testar regras de recuperação ambiental adaptadas à realidade do bairro, com avaliação pública dos resultados.",
+      "issueId": "#fluxo-e2e-variacao-001",
+      "urgencia": false,
+      "txHash": "0xf4836bf6fe5d",
+      "impactedNeighborhoodIds": [
+        "sape"
+      ],
+      "ci": {
+        "conflito": true,
+        "orcamento": true,
+        "constitucional": true,
+        "redacao": true
+      },
+      "quorum": 1.2,
+      "votingEndsAt": "2026-04-02T17:07:37.251Z",
+      "votes": [
+        {
+          "address": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+          "choice": "favor",
+          "weight": 1,
+          "bairroId": "sape",
+          "bairroNome": "Sape",
+          "createdAt": "2026-03-19T17:07:38.041Z"
+        },
+        {
+          "address": "0x71bE63f3384f5fb98995898A86B02Fb2426c5788",
+          "choice": "favor",
+          "weight": 0.6,
+          "bairroId": "centro",
+          "bairroNome": "Centro",
+          "createdAt": "2026-03-19T17:07:38.876Z"
+        }
+      ],
+      "comments": [],
+      "source": "municipal",
+      "variationDraft": {
+        "nome": "Protocolo Verde - Sapé",
+        "slug": "protocolo-verde-sape",
+        "objetivo": "Permitir experimento territorial com regras operacionais de recuperação ambiental, registro público dos efeitos e revisão periódica dos resultados locais.",
+        "duracaoMeses": 8,
+        "bairroId": "sape",
+        "bairroNome": "Sape"
+      },
+      "closedAt": "2026-03-19T17:07:38.876Z",
+      "resolutionReason": "aprovado_por_quorum"
+    },
+    {
+      "id": "pr-204",
+      "kind": "emenda",
+      "titulo": "Ampliar fjfjgdgjhkhkhk",
+      "leiAlvoId": "lei-1",
+      "leiAlvoNome": "Plano Diretor Estrategico",
+      "artigoAlvoId": "lei-1-art-1",
+      "artigoAlvoRotulo": "Art. 1o",
+      "status": "aberto",
+      "autor": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "bairroId": "sape",
+      "bairroNome": "Sape",
+      "criadoEm": "2026-03-19T18:08:57.706Z",
+      "justificativa": "Agora nhjsfjjedtujtyujetyuetuyetdgyhsf fhsfhfh sfhjdjdgj fshhfshsf bhsfhfsc tbcdfgerhg b",
+      "issueId": "",
+      "urgencia": false,
+      "txHash": "0xaadee0a8576d",
+      "impactedNeighborhoodIds": [
+        "conceicao-itagua"
+      ],
+      "ci": {
+        "conflito": true,
+        "orcamento": true,
+        "constitucional": true,
+        "redacao": null
+      },
+      "oldText": "O Poder Executivo publicará relatório trimestral, em linguagem simples e acesso aberto, com mapa por bairro das revisões e decisões urbanísticas relacionadas a este plano.",
+      "newText": "O Poder Executivo publicará relatório trimestral, em linguagem simples e acesso aberto, com mapa por bairro das revisões e decisões urbanísticas relacionadas a este plano.",
+      "quorum": 2,
+      "votingEndsAt": "2026-04-02T18:08:57.706Z",
+      "votes": [],
+      "comments": [],
+      "source": "municipal"
     }
   ],
   "forks": [
@@ -536,9 +881,27 @@
       "autor": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
       "status": "ativo",
       "participantes": 450,
+      "sourceProposalId": "pr-104",
       "proposalIds": [
         "pr-201"
       ]
+    },
+    {
+      "id": "fork-002",
+      "slug": "protocolo-verde-sape",
+      "nome": "Protocolo Verde - Sapé",
+      "bairroId": "sape",
+      "bairroNome": "Sape",
+      "leiOrigemId": "lei-3",
+      "leiForkId": "lei-fork-002",
+      "objetivo": "Permitir experimento territorial com regras operacionais de recuperação ambiental, registro público dos efeitos e revisão periódica dos resultados locais.",
+      "duracaoMeses": 8,
+      "criadoEm": "2026-03-19T17:07:39.958Z",
+      "autor": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "status": "ativo",
+      "participantes": 1,
+      "proposalIds": [],
+      "sourceProposalId": "pr-203"
     }
   ],
   "activities": [
@@ -601,6 +964,695 @@
       "data": "2026-03-17T17:49:08.310Z",
       "lida": false,
       "link": "/propostas/pr-102"
+    },
+    {
+      "id": "activity-007",
+      "address": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "tipo": "pr_aprovado",
+      "titulo": "PR aprovado: pr-102",
+      "descricao": "Amplia largura minima em vias arteriais gerou um novo commit em Estatuto do Pedestre.",
+      "data": "2026-03-19T14:04:13.342Z",
+      "lida": false,
+      "link": "/propostas/pr-102"
+    },
+    {
+      "id": "activity-008",
+      "address": "0x71bE63f3384f5fb98995898A86B02Fb2426c5788",
+      "tipo": "pr_aprovado",
+      "titulo": "PR aprovado: pr-102",
+      "descricao": "Amplia largura minima em vias arteriais gerou um novo commit em Estatuto do Pedestre.",
+      "data": "2026-03-19T14:04:13.342Z",
+      "lida": true,
+      "link": "/propostas/pr-102"
+    },
+    {
+      "id": "activity-009",
+      "address": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+      "tipo": "pr_aprovado",
+      "titulo": "PR aprovado: pr-102",
+      "descricao": "Amplia largura minima em vias arteriais gerou um novo commit em Estatuto do Pedestre.",
+      "data": "2026-03-19T14:04:13.342Z",
+      "lida": false,
+      "link": "/propostas/pr-102"
+    },
+    {
+      "id": "activity-010",
+      "address": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+      "tipo": "mint_nft",
+      "titulo": "NFT de cidadania emitido",
+      "descricao": "Sua cidadania foi emitida para o bairro Corrego do Feijao em ambiente alpha local.",
+      "data": "2026-03-19T17:07:29.501Z",
+      "lida": true,
+      "link": "/perfil"
+    },
+    {
+      "id": "activity-011",
+      "address": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "tipo": "pr_novo",
+      "titulo": "Nova proposta aberta: pr-202",
+      "descricao": "Amplia transparência territorial das revisões do Plano Diretor entrou em votacao com foco em Plano Diretor Estrategico.",
+      "data": "2026-03-19T17:07:30.244Z",
+      "lida": false,
+      "link": "/propostas/pr-202"
+    },
+    {
+      "id": "activity-012",
+      "address": "0x71bE63f3384f5fb98995898A86B02Fb2426c5788",
+      "tipo": "pr_novo",
+      "titulo": "Nova proposta aberta: pr-202",
+      "descricao": "Amplia transparência territorial das revisões do Plano Diretor entrou em votacao com foco em Plano Diretor Estrategico.",
+      "data": "2026-03-19T17:07:30.244Z",
+      "lida": false,
+      "link": "/propostas/pr-202"
+    },
+    {
+      "id": "activity-013",
+      "address": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+      "tipo": "pr_novo",
+      "titulo": "Nova proposta aberta: pr-202",
+      "descricao": "Amplia transparência territorial das revisões do Plano Diretor entrou em votacao com foco em Plano Diretor Estrategico.",
+      "data": "2026-03-19T17:07:30.244Z",
+      "lida": false,
+      "link": "/propostas/pr-202"
+    },
+    {
+      "id": "activity-014",
+      "address": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+      "tipo": "comentario",
+      "titulo": "Novo comentario em pr-202",
+      "descricao": "Sape comentou: \"Comentário de teste institucional: a redação ficou clara e rastreável pa...\"",
+      "data": "2026-03-19T17:07:31.139Z",
+      "lida": true,
+      "link": "/propostas/pr-202"
+    },
+    {
+      "id": "activity-015",
+      "address": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "tipo": "pr_aprovado",
+      "titulo": "PR aprovado: pr-202",
+      "descricao": "Amplia transparência territorial das revisões do Plano Diretor gerou um novo commit em Plano Diretor Estrategico.",
+      "data": "2026-03-19T17:07:33.619Z",
+      "lida": false,
+      "link": "/propostas/pr-202"
+    },
+    {
+      "id": "activity-016",
+      "address": "0x71bE63f3384f5fb98995898A86B02Fb2426c5788",
+      "tipo": "pr_aprovado",
+      "titulo": "PR aprovado: pr-202",
+      "descricao": "Amplia transparência territorial das revisões do Plano Diretor gerou um novo commit em Plano Diretor Estrategico.",
+      "data": "2026-03-19T17:07:33.619Z",
+      "lida": false,
+      "link": "/propostas/pr-202"
+    },
+    {
+      "id": "activity-017",
+      "address": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+      "tipo": "pr_aprovado",
+      "titulo": "PR aprovado: pr-202",
+      "descricao": "Amplia transparência territorial das revisões do Plano Diretor gerou um novo commit em Plano Diretor Estrategico.",
+      "data": "2026-03-19T17:07:33.619Z",
+      "lida": false,
+      "link": "/propostas/pr-202"
+    },
+    {
+      "id": "activity-018",
+      "address": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+      "tipo": "pr_aprovado",
+      "titulo": "PR aprovado: pr-202",
+      "descricao": "Amplia transparência territorial das revisões do Plano Diretor gerou um novo commit em Plano Diretor Estrategico.",
+      "data": "2026-03-19T17:07:33.619Z",
+      "lida": true,
+      "link": "/propostas/pr-202"
+    },
+    {
+      "id": "activity-019",
+      "address": "0x71bE63f3384f5fb98995898A86B02Fb2426c5788",
+      "tipo": "pr_novo",
+      "titulo": "Nova proposta aberta: pr-203",
+      "descricao": "Autoriza variação local de recuperação ambiental no Sapé entrou em votacao com foco em Politica Municipal de Meio Ambiente.",
+      "data": "2026-03-19T17:07:37.250Z",
+      "lida": false,
+      "link": "/propostas/pr-203"
+    },
+    {
+      "id": "activity-020",
+      "address": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+      "tipo": "pr_novo",
+      "titulo": "Nova proposta aberta: pr-203",
+      "descricao": "Autoriza variação local de recuperação ambiental no Sapé entrou em votacao com foco em Politica Municipal de Meio Ambiente.",
+      "data": "2026-03-19T17:07:37.250Z",
+      "lida": false,
+      "link": "/propostas/pr-203"
+    },
+    {
+      "id": "activity-021",
+      "address": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+      "tipo": "pr_novo",
+      "titulo": "Nova proposta aberta: pr-203",
+      "descricao": "Autoriza variação local de recuperação ambiental no Sapé entrou em votacao com foco em Politica Municipal de Meio Ambiente.",
+      "data": "2026-03-19T17:07:37.250Z",
+      "lida": true,
+      "link": "/propostas/pr-203"
+    },
+    {
+      "id": "activity-022",
+      "address": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "tipo": "pr_aprovado",
+      "titulo": "Variacao autorizada: pr-203",
+      "descricao": "Autoriza variação local de recuperação ambiental no Sapé autorizou a abertura de uma variacao local em Sape.",
+      "data": "2026-03-19T17:07:38.876Z",
+      "lida": true,
+      "link": "/propostas/pr-203"
+    },
+    {
+      "id": "activity-023",
+      "address": "0x71bE63f3384f5fb98995898A86B02Fb2426c5788",
+      "tipo": "pr_aprovado",
+      "titulo": "Variacao autorizada: pr-203",
+      "descricao": "Autoriza variação local de recuperação ambiental no Sapé autorizou a abertura de uma variacao local em Sape.",
+      "data": "2026-03-19T17:07:38.876Z",
+      "lida": false,
+      "link": "/propostas/pr-203"
+    },
+    {
+      "id": "activity-024",
+      "address": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+      "tipo": "pr_aprovado",
+      "titulo": "Variacao autorizada: pr-203",
+      "descricao": "Autoriza variação local de recuperação ambiental no Sapé autorizou a abertura de uma variacao local em Sape.",
+      "data": "2026-03-19T17:07:38.876Z",
+      "lida": false,
+      "link": "/propostas/pr-203"
+    },
+    {
+      "id": "activity-025",
+      "address": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+      "tipo": "pr_aprovado",
+      "titulo": "Variacao autorizada: pr-203",
+      "descricao": "Autoriza variação local de recuperação ambiental no Sapé autorizou a abertura de uma variacao local em Sape.",
+      "data": "2026-03-19T17:07:38.876Z",
+      "lida": true,
+      "link": "/propostas/pr-203"
+    },
+    {
+      "id": "activity-026",
+      "address": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "tipo": "fork_novo",
+      "titulo": "Nova variacao local em Sape",
+      "descricao": "Protocolo Verde - Sapé foi inicializado para experimentacao legislativa local.",
+      "data": "2026-03-19T17:07:39.958Z",
+      "lida": true,
+      "link": "/bairros/sape"
+    },
+    {
+      "id": "activity-027",
+      "address": "0x71bE63f3384f5fb98995898A86B02Fb2426c5788",
+      "tipo": "pr_novo",
+      "titulo": "Nova proposta aberta: pr-204",
+      "descricao": "Ampliar fjfjgdgjhkhkhk entrou em votacao com foco em Plano Diretor Estrategico.",
+      "data": "2026-03-19T18:08:57.706Z",
+      "lida": false,
+      "link": "/propostas/pr-204"
+    },
+    {
+      "id": "activity-028",
+      "address": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+      "tipo": "pr_novo",
+      "titulo": "Nova proposta aberta: pr-204",
+      "descricao": "Ampliar fjfjgdgjhkhkhk entrou em votacao com foco em Plano Diretor Estrategico.",
+      "data": "2026-03-19T18:08:57.706Z",
+      "lida": false,
+      "link": "/propostas/pr-204"
+    },
+    {
+      "id": "activity-029",
+      "address": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+      "tipo": "pr_novo",
+      "titulo": "Nova proposta aberta: pr-204",
+      "descricao": "Ampliar fjfjgdgjhkhkhk entrou em votacao com foco em Plano Diretor Estrategico.",
+      "data": "2026-03-19T18:08:57.706Z",
+      "lida": false,
+      "link": "/propostas/pr-204"
+    }
+  ],
+  "events": [
+    {
+      "id": "event-001",
+      "type": "SessionAuthenticated",
+      "actorAddress": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "entityType": "sessao",
+      "entityId": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "occurredAt": "2026-03-19T14:02:20.340Z",
+      "payload": {
+        "authMethod": "demo"
+      }
+    },
+    {
+      "id": "event-002",
+      "type": "SessionAuthenticated",
+      "actorAddress": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "entityType": "sessao",
+      "entityId": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "occurredAt": "2026-03-19T14:03:51.321Z",
+      "payload": {
+        "authMethod": "demo"
+      }
+    },
+    {
+      "id": "event-003",
+      "type": "VoteCast",
+      "actorAddress": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "entityType": "proposta",
+      "entityId": "pr-102",
+      "occurredAt": "2026-03-19T14:04:13.342Z",
+      "payload": {
+        "choice": "favor",
+        "weight": 0.6,
+        "bairroId": "sape"
+      }
+    },
+    {
+      "id": "event-004",
+      "type": "ProposalApproved",
+      "actorAddress": "0x71bE63f3384f5fb98995898A86B02Fb2426c5788",
+      "entityType": "proposta",
+      "entityId": "pr-102",
+      "occurredAt": "2026-03-19T14:04:13.342Z",
+      "payload": {
+        "leiId": "lei-4",
+        "commitId": "commit-007",
+        "versao": "1.0.4",
+        "workflowStage": "consolidacao"
+      }
+    },
+    {
+      "id": "event-005",
+      "type": "LawCommitRecorded",
+      "actorAddress": "0x71bE63f3384f5fb98995898A86B02Fb2426c5788",
+      "entityType": "lei",
+      "entityId": "lei-4",
+      "occurredAt": "2026-03-19T14:04:13.342Z",
+      "payload": {
+        "proposalId": "pr-102",
+        "commitId": "commit-007",
+        "versao": "1.0.4"
+      }
+    },
+    {
+      "id": "event-006",
+      "type": "SessionAuthenticated",
+      "actorAddress": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "entityType": "sessao",
+      "entityId": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "occurredAt": "2026-03-19T14:20:32.360Z",
+      "payload": {
+        "authMethod": "demo"
+      }
+    },
+    {
+      "id": "event-007",
+      "type": "SessionAuthenticated",
+      "actorAddress": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "entityType": "sessao",
+      "entityId": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "occurredAt": "2026-03-19T14:25:37.063Z",
+      "payload": {
+        "authMethod": "demo"
+      }
+    },
+    {
+      "id": "event-008",
+      "type": "SessionAuthenticated",
+      "actorAddress": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "entityType": "sessao",
+      "entityId": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "occurredAt": "2026-03-19T17:07:29.300Z",
+      "payload": {
+        "authMethod": "demo"
+      }
+    },
+    {
+      "id": "event-009",
+      "type": "SessionAuthenticated",
+      "actorAddress": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+      "entityType": "sessao",
+      "entityId": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+      "occurredAt": "2026-03-19T17:07:29.440Z",
+      "payload": {
+        "authMethod": "wallet"
+      }
+    },
+    {
+      "id": "event-010",
+      "type": "CitizenIssued",
+      "actorAddress": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+      "entityType": "cidadania",
+      "entityId": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+      "occurredAt": "2026-03-19T17:07:29.501Z",
+      "payload": {
+        "bairroId": "corrego-feijao",
+        "bairroNome": "Corrego do Feijao",
+        "nivel": 1
+      }
+    },
+    {
+      "id": "event-011",
+      "type": "ProposalCreated",
+      "actorAddress": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+      "entityType": "proposta",
+      "entityId": "pr-202",
+      "occurredAt": "2026-03-19T17:07:30.244Z",
+      "payload": {
+        "leiId": "lei-1",
+        "artigoId": "lei-1-art-1",
+        "status": "aberto",
+        "kind": "emenda",
+        "impactedNeighborhoodIds": [
+          "corrego-feijao"
+        ],
+        "variationDraft": null
+      }
+    },
+    {
+      "id": "event-012",
+      "type": "ProposalOpenedForVoting",
+      "actorAddress": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+      "entityType": "proposta",
+      "entityId": "pr-202",
+      "occurredAt": "2026-03-19T17:07:30.244Z",
+      "payload": {
+        "leiId": "lei-1",
+        "status": "aberto",
+        "kind": "emenda"
+      }
+    },
+    {
+      "id": "event-013",
+      "type": "CommentAdded",
+      "actorAddress": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "entityType": "comentario",
+      "entityId": "pr-202",
+      "occurredAt": "2026-03-19T17:07:31.139Z",
+      "payload": {
+        "proposalId": "pr-202",
+        "bodyPreview": "Comentário de teste institucional: a redação ficou clara e rastreável para acompanhamento por bairro."
+      }
+    },
+    {
+      "id": "event-014",
+      "type": "SessionAuthenticated",
+      "actorAddress": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+      "entityType": "sessao",
+      "entityId": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+      "occurredAt": "2026-03-19T17:07:31.196Z",
+      "payload": {
+        "authMethod": "wallet"
+      }
+    },
+    {
+      "id": "event-015",
+      "type": "VoteCast",
+      "actorAddress": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+      "entityType": "proposta",
+      "entityId": "pr-202",
+      "occurredAt": "2026-03-19T17:07:31.248Z",
+      "payload": {
+        "choice": "favor",
+        "weight": 1,
+        "bairroId": "corrego-feijao"
+      }
+    },
+    {
+      "id": "event-016",
+      "type": "VoteCast",
+      "actorAddress": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "entityType": "proposta",
+      "entityId": "pr-202",
+      "occurredAt": "2026-03-19T17:07:32.147Z",
+      "payload": {
+        "choice": "favor",
+        "weight": 0.6,
+        "bairroId": "sape"
+      }
+    },
+    {
+      "id": "event-017",
+      "type": "VoteCast",
+      "actorAddress": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+      "entityType": "proposta",
+      "entityId": "pr-202",
+      "occurredAt": "2026-03-19T17:07:33.619Z",
+      "payload": {
+        "choice": "favor",
+        "weight": 0.6,
+        "bairroId": "conceicao-itagua"
+      }
+    },
+    {
+      "id": "event-018",
+      "type": "ProposalApproved",
+      "actorAddress": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+      "entityType": "proposta",
+      "entityId": "pr-202",
+      "occurredAt": "2026-03-19T17:07:33.619Z",
+      "payload": {
+        "leiId": "lei-1",
+        "commitId": "commit-008",
+        "versao": "4.2.1",
+        "workflowStage": "consolidacao"
+      }
+    },
+    {
+      "id": "event-019",
+      "type": "LawCommitRecorded",
+      "actorAddress": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+      "entityType": "lei",
+      "entityId": "lei-1",
+      "occurredAt": "2026-03-19T17:07:33.619Z",
+      "payload": {
+        "proposalId": "pr-202",
+        "commitId": "commit-008",
+        "versao": "4.2.1"
+      }
+    },
+    {
+      "id": "event-020",
+      "type": "SessionAuthenticated",
+      "actorAddress": "0x71bE63f3384f5fb98995898A86B02Fb2426c5788",
+      "entityType": "sessao",
+      "entityId": "0x71bE63f3384f5fb98995898A86B02Fb2426c5788",
+      "occurredAt": "2026-03-19T17:07:37.198Z",
+      "payload": {
+        "authMethod": "wallet"
+      }
+    },
+    {
+      "id": "event-021",
+      "type": "ProposalCreated",
+      "actorAddress": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "entityType": "proposta",
+      "entityId": "pr-203",
+      "occurredAt": "2026-03-19T17:07:37.250Z",
+      "payload": {
+        "leiId": "lei-3",
+        "artigoId": null,
+        "status": "aberto",
+        "kind": "variacao_local",
+        "impactedNeighborhoodIds": [
+          "sape"
+        ],
+        "variationDraft": {
+          "bairroId": "sape",
+          "duracaoMeses": 8
+        }
+      }
+    },
+    {
+      "id": "event-022",
+      "type": "ProposalOpenedForVoting",
+      "actorAddress": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "entityType": "proposta",
+      "entityId": "pr-203",
+      "occurredAt": "2026-03-19T17:07:37.250Z",
+      "payload": {
+        "leiId": "lei-3",
+        "status": "aberto",
+        "kind": "variacao_local"
+      }
+    },
+    {
+      "id": "event-023",
+      "type": "VoteCast",
+      "actorAddress": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "entityType": "proposta",
+      "entityId": "pr-203",
+      "occurredAt": "2026-03-19T17:07:38.041Z",
+      "payload": {
+        "choice": "favor",
+        "weight": 1,
+        "bairroId": "sape"
+      }
+    },
+    {
+      "id": "event-024",
+      "type": "VoteCast",
+      "actorAddress": "0x71bE63f3384f5fb98995898A86B02Fb2426c5788",
+      "entityType": "proposta",
+      "entityId": "pr-203",
+      "occurredAt": "2026-03-19T17:07:38.876Z",
+      "payload": {
+        "choice": "favor",
+        "weight": 0.6,
+        "bairroId": "centro"
+      }
+    },
+    {
+      "id": "event-025",
+      "type": "ProposalApproved",
+      "actorAddress": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "entityType": "proposta",
+      "entityId": "pr-203",
+      "occurredAt": "2026-03-19T17:07:38.876Z",
+      "payload": {
+        "leiId": "lei-3",
+        "workflowStage": "consolidacao",
+        "kind": "variacao_local",
+        "bairroId": "sape"
+      }
+    },
+    {
+      "id": "event-026",
+      "type": "LocalVariationOpened",
+      "actorAddress": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "entityType": "variacao",
+      "entityId": "fork-002",
+      "occurredAt": "2026-03-19T17:07:39.958Z",
+      "payload": {
+        "bairroId": "sape",
+        "leiOrigemId": "lei-3",
+        "leiForkId": "lei-fork-002",
+        "sourceProposalId": "pr-203"
+      }
+    },
+    {
+      "id": "event-027",
+      "type": "ActivitiesMarkedRead",
+      "actorAddress": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+      "entityType": "atividade",
+      "entityId": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+      "occurredAt": "2026-03-19T17:07:42.083Z",
+      "payload": {}
+    },
+    {
+      "id": "event-028",
+      "type": "SessionAuthenticated",
+      "actorAddress": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "entityType": "sessao",
+      "entityId": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "occurredAt": "2026-03-19T17:29:53.086Z",
+      "payload": {
+        "authMethod": "demo"
+      }
+    },
+    {
+      "id": "event-029",
+      "type": "SessionAuthenticated",
+      "actorAddress": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "entityType": "sessao",
+      "entityId": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "occurredAt": "2026-03-19T17:29:55.789Z",
+      "payload": {
+        "authMethod": "demo"
+      }
+    },
+    {
+      "id": "event-030",
+      "type": "VoteCast",
+      "actorAddress": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "entityType": "proposta",
+      "entityId": "pr-201",
+      "occurredAt": "2026-03-19T17:30:54.850Z",
+      "payload": {
+        "choice": "favor",
+        "weight": 1,
+        "bairroId": "sape"
+      }
+    },
+    {
+      "id": "event-031",
+      "type": "SessionAuthenticated",
+      "actorAddress": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "entityType": "sessao",
+      "entityId": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "occurredAt": "2026-03-19T17:44:21.618Z",
+      "payload": {
+        "authMethod": "demo"
+      }
+    },
+    {
+      "id": "event-032",
+      "type": "SessionAuthenticated",
+      "actorAddress": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "entityType": "sessao",
+      "entityId": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "occurredAt": "2026-03-19T17:45:22.154Z",
+      "payload": {
+        "authMethod": "demo"
+      }
+    },
+    {
+      "id": "event-033",
+      "type": "ProposalCreated",
+      "actorAddress": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "entityType": "proposta",
+      "entityId": "pr-204",
+      "occurredAt": "2026-03-19T18:08:57.706Z",
+      "payload": {
+        "leiId": "lei-1",
+        "artigoId": "lei-1-art-1",
+        "status": "aberto",
+        "kind": "emenda",
+        "impactedNeighborhoodIds": [
+          "conceicao-itagua"
+        ],
+        "variationDraft": null
+      }
+    },
+    {
+      "id": "event-034",
+      "type": "ProposalOpenedForVoting",
+      "actorAddress": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "entityType": "proposta",
+      "entityId": "pr-204",
+      "occurredAt": "2026-03-19T18:08:57.706Z",
+      "payload": {
+        "leiId": "lei-1",
+        "status": "aberto",
+        "kind": "emenda"
+      }
+    },
+    {
+      "id": "event-035",
+      "type": "SessionAuthenticated",
+      "actorAddress": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "entityType": "sessao",
+      "entityId": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "occurredAt": "2026-03-19T18:11:49.739Z",
+      "payload": {
+        "authMethod": "demo"
+      }
+    },
+    {
+      "id": "event-036",
+      "type": "SessionAuthenticated",
+      "actorAddress": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "entityType": "sessao",
+      "entityId": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "occurredAt": "2026-03-19T18:11:56.079Z",
+      "payload": {
+        "authMethod": "demo"
+      }
     }
   ]
 }

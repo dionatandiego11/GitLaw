@@ -12,6 +12,7 @@
     "chain:compile": "npm run chain:cli -- compile",
     "chain:test": "npm run chain:cli -- test",
     "chain:deploy": "npm run chain:cli -- run scripts/deploy-local.js --network localhost",
+    "smoke:flow": "node scripts/smoke-local-flow.js",
     "build": "vite build",
     "preview": "vite preview",
     "clean": "rm -rf dist artifacts cache",

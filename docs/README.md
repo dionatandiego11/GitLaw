@@ -2,6 +2,7 @@
 
 Este diretorio organiza a documentacao tecnica e institucional do projeto em cinco eixos:
 
+- whitepaper
 - arquitetura
 - dominio
 - fluxos legislativos
@@ -11,6 +12,11 @@ Este diretorio organiza a documentacao tecnica e institucional do projeto em cin
 Documento consolidado:
 
 - [Analise Tecnica da Logica do Sistema](./analise-tecnica-logica-do-sistema.md)
+- [GitLaw White Paper](./whitepaper/gitlaw-white-paper.md)
+
+## White Paper
+
+- [GitLaw White Paper](./whitepaper/gitlaw-white-paper.md)
 
 ## Arquitetura
 

@@ -118,7 +118,7 @@ export function LeiDetalhe() {
           {currentCitizen ? (
             <Link to={`/leis/${lei.id}/fork`} className="flex items-center justify-center w-full py-3 bg-[var(--color-git-purple)] hover:opacity-90 text-white rounded-xl font-medium transition-opacity gap-2 border border-[rgba(188,140,255,0.4)]">
               <GitFork className="w-4 h-4" />
-              Criar variação para {currentCitizen.bairroNome}
+              Propor variação para {currentCitizen.bairroNome}
             </Link>
           ) : null}
         </div>

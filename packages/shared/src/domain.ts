@@ -7,7 +7,21 @@ export type CategoriaLei =
   | 'administracao';
 
 export type ProposalStatus = 'aberto' | 'em-revisao' | 'aprovado' | 'rejeitado';
+export type ProposalKind = 'emenda' | 'variacao_local';
+export type ProposalWorkflowStage =
+  | 'admissibilidade'
+  | 'revisao'
+  | 'votacao'
+  | 'consolidacao'
+  | 'encerrada';
 export type VoteChoice = 'favor' | 'contra' | 'abster';
+export type SessionAuthMethod = 'demo' | 'wallet';
+export type AuthorityAction =
+  | 'solicitar_cidadania'
+  | 'propor'
+  | 'votar'
+  | 'comentar'
+  | 'criar_variacao';
 export type ActivityType =
   | 'pr_novo'
   | 'voto_pendente'
@@ -23,6 +37,36 @@ export type ProposalResolutionReason =
   | 'maioria_contra'
   | 'empate'
   | 'bloqueio_ci';
+
+export type DomainEventType =
+  | 'CitizenIssued'
+  | 'ProposalCreated'
+  | 'ProposalMovedToReview'
+  | 'ProposalOpenedForVoting'
+  | 'VoteCast'
+  | 'ProposalApproved'
+  | 'ProposalRejected'
+  | 'LawCommitRecorded'
+  | 'CommentAdded'
+  | 'LocalVariationOpened'
+  | 'ActivitiesMarkedRead'
+  | 'SessionAuthenticated';
+
+export interface AuthorityGrant {
+  action: AuthorityAction;
+  allowed: boolean;
+  reason: string | null;
+}
+
+export interface DomainEvent {
+  id: string;
+  type: DomainEventType;
+  actorAddress: string | null;
+  entityType: 'cidadania' | 'proposta' | 'lei' | 'variacao' | 'comentario' | 'sessao' | 'atividade';
+  entityId: string;
+  occurredAt: string;
+  payload: Record<string, unknown>;
+}
 
 export interface Neighborhood {
   id: string;
@@ -106,6 +150,15 @@ export interface ProposalCI {
   redacao: boolean | null;
 }
 
+export interface ProposalVariationDraft {
+  nome: string;
+  slug: string;
+  objetivo: string;
+  duracaoMeses: number;
+  bairroId: string;
+  bairroNome: string;
+}
+
 export interface VoteRecord {
   address: string;
   choice: VoteChoice;
@@ -124,11 +177,12 @@ export interface ProposalComment {
 
 export interface Proposal {
   id: string;
+  kind: ProposalKind;
   titulo: string;
   leiAlvoId: string;
   leiAlvoNome: string;
-  artigoAlvoId: string;
-  artigoAlvoRotulo: string;
+  artigoAlvoId?: string;
+  artigoAlvoRotulo?: string;
   status: ProposalStatus;
   autor: string;
   bairroId: string;
@@ -140,8 +194,8 @@ export interface Proposal {
   txHash?: string;
   impactedNeighborhoodIds: string[];
   ci: ProposalCI;
-  oldText: string;
-  newText: string;
+  oldText?: string;
+  newText?: string;
   quorum: number;
   votingEndsAt: string;
   closedAt?: string;
@@ -150,6 +204,7 @@ export interface Proposal {
   comments: ProposalComment[];
   forkId?: string;
   source: 'municipal' | 'fork';
+  variationDraft?: ProposalVariationDraft;
 }
 
 export interface ProposalTally {
@@ -164,6 +219,8 @@ export interface ProposalTally {
 
 export interface ProposalView extends Proposal {
   tally: ProposalTally;
+  workflowStage: ProposalWorkflowStage;
+  availableActions: AuthorityGrant[];
   currentUserWeight: number;
   hasVoted: boolean;
   canVote: boolean;
@@ -187,6 +244,7 @@ export interface ForkExperiment {
   status: 'ativo' | 'concluido' | 'pendente';
   participantes: number;
   proposalIds: string[];
+  sourceProposalId: string;
 }
 
 export interface Activity {
@@ -217,6 +275,8 @@ export interface BootstrapPayload {
     address: string | null;
     citizen: Citizen | null;
     pendingRequest: CitizenshipRequest | null;
+    authenticated: boolean;
+    authMethod: SessionAuthMethod | null;
     demo: boolean;
   };
   laws: Law[];
@@ -226,6 +286,7 @@ export interface BootstrapPayload {
   forks: ForkExperiment[];
   activities: Activity[];
   profile: ProfileData | null;
+  events: DomainEvent[];
   feed: {
     urgentProposalIds: string[];
     recentProposalIds: string[];
@@ -259,7 +320,26 @@ export interface ConnectSessionResponse {
   address: string;
   citizen: Citizen | null;
   pendingRequest: CitizenshipRequest | null;
+  authenticated: boolean;
+  authMethod: SessionAuthMethod;
   demo: boolean;
+  sessionToken: string;
+}
+
+export interface WalletChallengeInput {
+  address: string;
+}
+
+export interface WalletChallengeResponse {
+  address: string;
+  nonce: string;
+  message: string;
+  expiresAt: string;
+}
+
+export interface WalletVerifyInput {
+  address: string;
+  signature: string;
 }
 
 export interface CitizenshipIssueInput {
@@ -272,23 +352,27 @@ export interface CitizenshipIssueInput {
 
 export interface CreateProposalInput {
   authorAddress: string;
+  kind?: ProposalKind;
   lawId: string;
-  articleId: string;
+  articleId?: string;
   title: string;
   justification: string;
-  newText: string;
-  impactedNeighborhoodIds: string[];
+  newText?: string;
+  impactedNeighborhoodIds?: string[];
   issueId?: string;
   urgency?: boolean;
+  variationDraft?: {
+    name: string;
+    objective: string;
+    durationMonths: number;
+    slug?: string;
+  };
 }
 
 export interface CreateForkInput {
   authorAddress: string;
-  lawId: string;
   bairroId: string;
-  name: string;
-  objective: string;
-  durationMonths: number;
+  sourceProposalId: string;
 }
 
 export interface ProposalVoteInput {

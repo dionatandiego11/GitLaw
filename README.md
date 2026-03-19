@@ -5,12 +5,15 @@ Alpha local do GitLaw: uma plataforma de governanca legislativa inspirada em Git
 ## O que esta funcional no alpha
 
 - Conexao por carteira com fallback para sessao local de demonstracao
+- Assinatura de sessao para carteira e token local autenticado
 - Emissao local de cidadania com persistencia em disco
 - Repositorio legislativo com detalhe, blame por artigo e historico de commits
 - Criacao de PR legislativo em 3 passos
 - Votacao ponderada por proximidade geografica
 - Comentarios em propostas
 - Forks de bairro com repositorio local
+- Auditoria append-only de mutacoes do sistema
+- Fila protocolar com ancoragem on-chain dos eventos suportados
 
 ## Stack
 
@@ -54,13 +57,31 @@ Esse snapshot tambem fica disponivel pela API em `GET /api/chain/deployment`.
 - `npm run chain:compile`: compila os contratos Solidity
 - `npm run chain:test`: executa os testes Node.js do Hardhat
 - `npm run chain:deploy`: publica os contratos no node local e gera o snapshot de enderecos
+- `npm run smoke:flow`: sobe um ambiente isolado e valida o fluxo completo de cidadania, proposta, votacao, consolidacao e variacao local
 - `npm run build`: build do frontend
 - `npm run lint`: typecheck do frontend
+
+## Smoke test
+
+Para validar a espinha dorsal institucional do GitLaw sem tocar no ambiente principal:
+
+`npm run smoke:flow`
+
+Esse comando:
+
+- sobe uma chain Hardhat isolada em `127.0.0.1:9545`
+- publica os contratos localmente
+- sobe uma API isolada em `127.0.0.1:3101`
+- executa o fluxo `cidadania -> proposta -> comentario -> votacao -> consolidacao -> variacao local`
+- valida que a fila protocolar termina com `pending: 0`, `blocked: 0`, `failed: 0` e `skipped: 0`
+
+Os artefatos temporarios do smoke ficam em `.tmp/` para inspecao quando necessario.
 
 ## Documentacao
 
 A documentacao tecnica e institucional do projeto esta organizada em:
 
+- `docs/whitepaper/`: white paper e narrativa de lancamento
 - `docs/README.md`: indice geral
 - `docs/arquitetura/`: visao geral, arquitetura atual e arquitetura alvo
 - `docs/dominio/`: entidades, maquina de estados e regras de negocio
@@ -74,5 +95,18 @@ Os dados do alpha sao persistidos automaticamente em:
 
 - `data/store.json`
 - `data/chain.deployment.json`
+- `data/audit-log.ndjson`
+- `data/protocol-state.json`
+- `data/session.secret`
 
 Se quiser resetar o ambiente, remova esse arquivo e reinicie a API.
+
+## Observabilidade local
+
+Endpoints uteis para inspecionar o estado operacional:
+
+- `GET /api/health`
+- `GET /api/chain/deployment`
+- `GET /api/auditoria/eventos`
+- `GET /api/auditoria/transacoes`
+- `GET /api/protocolo/status`

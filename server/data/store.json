@@ -61,7 +61,7 @@
       "verificadoEm": "2026-01-18T11:00:00Z"
     },
     {
-      "address": "0x12aB34567890abCDef1234567890abCDef123456",
+      "address": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
       "bairroId": "conceicao-itagua",
       "bairroNome": "Conceicao de Itagua",
       "nivel": 2,
@@ -146,7 +146,7 @@
           "rotulo": "Art. 8o",
           "texto": "O Municipio podera incentivar boas praticas ambientais por meio de programas de educacao, certificacao voluntaria e isencao parcial de IPTU para imoveis com captacao de agua da chuva, nos termos do regulamento.",
           "ultimaAtualizacaoEm": "2026-03-01T09:15:00Z",
-          "ultimoAutor": "0x12aB34567890abCDef1234567890abCDef123456",
+          "ultimoAutor": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
           "ultimoCommitId": "commit-006"
         },
         {
@@ -168,17 +168,17 @@
       "titulo": "Estatuto do Pedestre",
       "numero": "Lei 16.673/2017",
       "categoria": "transporte",
-      "versao": "1.0.3",
-      "atualizadaEm": "2026-01-14T13:45:00Z",
+      "versao": "1.0.4",
+      "atualizadaEm": "2026-03-19T14:04:13.342Z",
       "resumo": "Garante prioridade, seguranca e conforto ao pedestre com votacao rastreavel por proposta.",
       "artigos": [
         {
           "id": "lei-4-art-4",
           "rotulo": "Art. 4o",
-          "texto": "A largura minima das calcadas sera de 1,20m, observadas as condicoes de seguranca e acessibilidade fixadas em regulamento.",
-          "ultimaAtualizacaoEm": "2026-01-14T13:45:00Z",
-          "ultimoAutor": "0xPrefeituraBrumadinho000000000000000000000001",
-          "ultimoCommitId": "commit-003"
+          "texto": "A largura minima das calcadas sera de 2,00m em vias arteriais e de 1,50m nas demais vias, observadas as condicoes de seguranca e acessibilidade fixadas em regulamento.",
+          "ultimaAtualizacaoEm": "2026-03-19T14:04:13.342Z",
+          "ultimoAutor": "0x71bE63f3384f5fb98995898A86B02Fb2426c5788",
+          "ultimoCommitId": "commit-007"
         },
         {
           "id": "lei-4-art-7",
@@ -190,7 +190,8 @@
         }
       ],
       "commitIds": [
-        "commit-003"
+        "commit-003",
+        "commit-007"
       ]
     },
     {
@@ -290,7 +291,7 @@
       "prId": "pr-103",
       "hash": "0x11a44c77e",
       "mensagem": "Cria incentivo para captacao de agua da chuva",
-      "autor": "0x12aB34567890abCDef1234567890abCDef123456",
+      "autor": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
       "timestamp": "2026-03-01T09:15:00Z",
       "versao": "1.8.2",
       "resumo": "Aprovacao municipal do incentivo fiscal para imoveis com captacao de agua da chuva.",
@@ -302,11 +303,31 @@
           "after": "O Municipio podera incentivar boas praticas ambientais por meio de programas de educacao, certificacao voluntaria e isencao parcial de IPTU para imoveis com captacao de agua da chuva, nos termos do regulamento."
         }
       ]
+    },
+    {
+      "id": "commit-007",
+      "leiId": "lei-4",
+      "prId": "pr-102",
+      "hash": "0x0b4a2760d0aa",
+      "mensagem": "Amplia largura minima em vias arteriais",
+      "autor": "0x71bE63f3384f5fb98995898A86B02Fb2426c5788",
+      "timestamp": "2026-03-19T14:04:13.342Z",
+      "versao": "1.0.4",
+      "resumo": "Adequar calcadas de vias arteriais ao fluxo de pedestres e a parametros minimos de acessibilidade urbana.",
+      "articleChanges": [
+        {
+          "articleId": "lei-4-art-4",
+          "rotulo": "Art. 4o",
+          "before": "A largura minima das calcadas sera de 1,20m, observadas as condicoes de seguranca e acessibilidade fixadas em regulamento.",
+          "after": "A largura minima das calcadas sera de 2,00m em vias arteriais e de 1,50m nas demais vias, observadas as condicoes de seguranca e acessibilidade fixadas em regulamento."
+        }
+      ]
     }
   ],
   "proposals": [
     {
       "id": "pr-101",
+      "kind": "emenda",
       "titulo": "Exige cobertura vegetal em novos comercios",
       "leiAlvoId": "lei-2",
       "leiAlvoNome": "Codigo de Obras e Edificacoes",
@@ -345,7 +366,7 @@
           "createdAt": "2026-03-15T09:00:00Z"
         },
         {
-          "address": "0x12aB34567890abCDef1234567890abCDef123456",
+          "address": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
           "choice": "contra",
           "weight": 0.3,
           "bairroId": "conceicao-itagua",
@@ -365,12 +386,13 @@
     },
     {
       "id": "pr-102",
+      "kind": "emenda",
       "titulo": "Amplia largura minima em vias arteriais",
       "leiAlvoId": "lei-4",
       "leiAlvoNome": "Estatuto do Pedestre",
       "artigoAlvoId": "lei-4-art-4",
       "artigoAlvoRotulo": "Art. 4o",
-      "status": "aberto",
+      "status": "aprovado",
       "autor": "0x71bE63f3384f5fb98995898A86B02Fb2426c5788",
       "bairroId": "centro",
       "bairroNome": "Centro",
@@ -402,12 +424,20 @@
           "createdAt": "2026-03-16T15:00:00Z"
         },
         {
-          "address": "0x12aB34567890abCDef1234567890abCDef123456",
+          "address": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
           "choice": "contra",
           "weight": 0.6,
           "bairroId": "conceicao-itagua",
           "bairroNome": "Conceicao de Itagua",
           "createdAt": "2026-03-16T19:00:00Z"
+        },
+        {
+          "address": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+          "choice": "favor",
+          "weight": 0.6,
+          "bairroId": "sape",
+          "bairroNome": "Sape",
+          "createdAt": "2026-03-19T14:04:13.342Z"
         }
       ],
       "comments": [
@@ -418,17 +448,20 @@
           "body": "Teste local de comentario para validar a API."
         }
       ],
-      "source": "municipal"
+      "source": "municipal",
+      "closedAt": "2026-03-19T14:04:13.342Z",
+      "resolutionReason": "aprovado_por_quorum"
     },
     {
       "id": "pr-103",
+      "kind": "emenda",
       "titulo": "Incentiva captacao de agua da chuva",
       "leiAlvoId": "lei-3",
       "leiAlvoNome": "Politica Municipal de Meio Ambiente",
       "artigoAlvoId": "lei-3-art-8",
       "artigoAlvoRotulo": "Art. 8o",
       "status": "aprovado",
-      "autor": "0x12aB34567890abCDef1234567890abCDef123456",
+      "autor": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
       "bairroId": "conceicao-itagua",
       "bairroNome": "Conceicao de Itagua",
       "criadoEm": "2026-02-28T10:00:00Z",
@@ -452,7 +485,7 @@
       "votingEndsAt": "2026-03-14T10:00:00Z",
       "votes": [
         {
-          "address": "0x12aB34567890abCDef1234567890abCDef123456",
+          "address": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
           "choice": "favor",
           "weight": 1,
           "bairroId": "conceicao-itagua",
@@ -487,7 +520,65 @@
       "source": "municipal"
     },
     {
+      "id": "pr-104",
+      "kind": "variacao_local",
+      "titulo": "Autoriza variacao local do Codigo de Obras no Sape",
+      "leiAlvoId": "lei-2",
+      "leiAlvoNome": "Codigo de Obras e Edificacoes",
+      "status": "aprovado",
+      "autor": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "bairroId": "sape",
+      "bairroNome": "Sape",
+      "criadoEm": "2026-03-08T09:00:00Z",
+      "justificativa": "Autorizar experimento territorial para uso misto de baixo impacto no Sape, com duracao limitada e trilha publica de resultados.",
+      "issueId": "#variacao-001",
+      "urgencia": false,
+      "txHash": "0xvariacao104",
+      "impactedNeighborhoodIds": [
+        "sape"
+      ],
+      "ci": {
+        "conflito": true,
+        "orcamento": true,
+        "constitucional": true,
+        "redacao": true
+      },
+      "quorum": 1.2,
+      "votingEndsAt": "2026-03-09T20:00:00Z",
+      "closedAt": "2026-03-09T20:10:00Z",
+      "resolutionReason": "aprovado_por_quorum",
+      "votes": [
+        {
+          "address": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+          "choice": "favor",
+          "weight": 1,
+          "bairroId": "sape",
+          "bairroNome": "Sape",
+          "createdAt": "2026-03-08T11:00:00Z"
+        },
+        {
+          "address": "0x71bE63f3384f5fb98995898A86B02Fb2426c5788",
+          "choice": "favor",
+          "weight": 0.6,
+          "bairroId": "centro",
+          "bairroNome": "Centro",
+          "createdAt": "2026-03-08T13:30:00Z"
+        }
+      ],
+      "comments": [],
+      "source": "municipal",
+      "variationDraft": {
+        "nome": "Zoneamento Misto - Sape",
+        "slug": "sape-zoneamento-misto",
+        "objetivo": "Permitir comercio de baixo impacto em ruas residenciais para fortalecer a economia local sem perder controle urbano.",
+        "duracaoMeses": 6,
+        "bairroId": "sape",
+        "bairroNome": "Sape"
+      }
+    },
+    {
       "id": "pr-201",
+      "kind": "emenda",
       "titulo": "Nova versao: libera padarias de baixo impacto em vias locais",
       "leiAlvoId": "lei-fork-1",
       "leiAlvoNome": "Codigo de Obras (Variacao Sape)",
@@ -536,6 +627,7 @@
       "autor": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
       "status": "ativo",
       "participantes": 450,
+      "sourceProposalId": "pr-104",
       "proposalIds": [
         "pr-201"
       ]
@@ -601,6 +693,122 @@
       "data": "2026-03-17T17:49:08.310Z",
       "lida": false,
       "link": "/propostas/pr-102"
+    },
+    {
+      "id": "activity-007",
+      "address": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "tipo": "pr_aprovado",
+      "titulo": "PR aprovado: pr-102",
+      "descricao": "Amplia largura minima em vias arteriais gerou um novo commit em Estatuto do Pedestre.",
+      "data": "2026-03-19T14:04:13.342Z",
+      "lida": false,
+      "link": "/propostas/pr-102"
+    },
+    {
+      "id": "activity-008",
+      "address": "0x71bE63f3384f5fb98995898A86B02Fb2426c5788",
+      "tipo": "pr_aprovado",
+      "titulo": "PR aprovado: pr-102",
+      "descricao": "Amplia largura minima em vias arteriais gerou um novo commit em Estatuto do Pedestre.",
+      "data": "2026-03-19T14:04:13.342Z",
+      "lida": true,
+      "link": "/propostas/pr-102"
+    },
+    {
+      "id": "activity-009",
+      "address": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+      "tipo": "pr_aprovado",
+      "titulo": "PR aprovado: pr-102",
+      "descricao": "Amplia largura minima em vias arteriais gerou um novo commit em Estatuto do Pedestre.",
+      "data": "2026-03-19T14:04:13.342Z",
+      "lida": false,
+      "link": "/propostas/pr-102"
+    }
+  ],
+  "events": [
+    {
+      "id": "event-001",
+      "type": "SessionAuthenticated",
+      "actorAddress": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "entityType": "sessao",
+      "entityId": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "occurredAt": "2026-03-19T14:02:20.340Z",
+      "payload": {
+        "authMethod": "demo"
+      }
+    },
+    {
+      "id": "event-002",
+      "type": "SessionAuthenticated",
+      "actorAddress": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "entityType": "sessao",
+      "entityId": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "occurredAt": "2026-03-19T14:03:51.321Z",
+      "payload": {
+        "authMethod": "demo"
+      }
+    },
+    {
+      "id": "event-003",
+      "type": "VoteCast",
+      "actorAddress": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "entityType": "proposta",
+      "entityId": "pr-102",
+      "occurredAt": "2026-03-19T14:04:13.342Z",
+      "payload": {
+        "choice": "favor",
+        "weight": 0.6,
+        "bairroId": "sape"
+      }
+    },
+    {
+      "id": "event-004",
+      "type": "ProposalApproved",
+      "actorAddress": "0x71bE63f3384f5fb98995898A86B02Fb2426c5788",
+      "entityType": "proposta",
+      "entityId": "pr-102",
+      "occurredAt": "2026-03-19T14:04:13.342Z",
+      "payload": {
+        "leiId": "lei-4",
+        "commitId": "commit-007",
+        "versao": "1.0.4",
+        "workflowStage": "consolidacao"
+      }
+    },
+    {
+      "id": "event-005",
+      "type": "LawCommitRecorded",
+      "actorAddress": "0x71bE63f3384f5fb98995898A86B02Fb2426c5788",
+      "entityType": "lei",
+      "entityId": "lei-4",
+      "occurredAt": "2026-03-19T14:04:13.342Z",
+      "payload": {
+        "proposalId": "pr-102",
+        "commitId": "commit-007",
+        "versao": "1.0.4"
+      }
+    },
+    {
+      "id": "event-006",
+      "type": "SessionAuthenticated",
+      "actorAddress": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "entityType": "sessao",
+      "entityId": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "occurredAt": "2026-03-19T14:20:32.360Z",
+      "payload": {
+        "authMethod": "demo"
+      }
+    },
+    {
+      "id": "event-007",
+      "type": "SessionAuthenticated",
+      "actorAddress": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "entityType": "sessao",
+      "entityId": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "occurredAt": "2026-03-19T14:25:37.063Z",
+      "payload": {
+        "authMethod": "demo"
+      }
     }
   ]
 }

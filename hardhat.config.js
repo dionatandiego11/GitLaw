@@ -3,6 +3,8 @@ import hardhatEthers from "@nomicfoundation/hardhat-ethers";
 import hardhatNetworkHelpers from "@nomicfoundation/hardhat-network-helpers";
 import hardhatNodeTestRunner from "@nomicfoundation/hardhat-node-test-runner";
 
+const localhostUrl = process.env.GITLAW_CHAIN_RPC ?? "http://127.0.0.1:8545";
+
 export default defineConfig({
   plugins: [hardhatEthers, hardhatNetworkHelpers, hardhatNodeTestRunner],
   solidity: {
@@ -37,7 +39,7 @@ export default defineConfig({
     localhost: {
       type: "http",
       chainType: "l1",
-      url: "http://127.0.0.1:8545",
+      url: localhostUrl,
     },
   },
   paths: {

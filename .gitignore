@@ -4,6 +4,10 @@ dist/
 coverage/
 artifacts/
 cache/
+.tmp/
+data/session.secret
+data/audit-log.ndjson
+data/protocol-state.json
 .DS_Store
 *.log
 .env*

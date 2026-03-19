@@ -1,4 +1,9 @@
 import crypto from 'node:crypto';
+import {
+  determineInitialProposalState,
+  resolveProposalLifecycleTransition,
+  resolveProposalWorkflowStage,
+} from './proposal-state-machine.js';
 
 export function sameAddress(left, right) {
   return String(left ?? '').toLowerCase() === String(right ?? '').toLowerCase();
@@ -12,6 +17,14 @@ export function must(value, message) {
   }
 
   return value;
+}
+
+export function ensureStoreCollections(store) {
+  if (!Array.isArray(store.events)) {
+    store.events = [];
+  }
+
+  return store;
 }
 
 export function findNeighborhood(store, id) {
@@ -107,6 +120,14 @@ export function proposalDeadlineReached(proposal, nowTimestamp = Date.now()) {
   return new Date(proposal.votingEndsAt).getTime() <= nowTimestamp;
 }
 
+export function resolveProposalKind(proposal) {
+  return proposal?.kind === 'variacao_local' ? 'variacao_local' : 'emenda';
+}
+
+export function isVariationAuthorizationProposal(proposal) {
+  return resolveProposalKind(proposal) === 'variacao_local';
+}
+
 export function buildVoteLockReason({ proposal, citizen, address, hasVoted, deadlineReached }) {
   if (!address) {
     return 'Conecte uma carteira para participar da votacao.';
@@ -114,6 +135,10 @@ export function buildVoteLockReason({ proposal, citizen, address, hasVoted, dead
 
   if (!citizen?.ativo) {
     return 'A cidadania ativa e obrigatoria para votar.';
+  }
+
+  if (sameAddress(proposal?.autor, address)) {
+    return 'A autoria acompanha a discussao, mas nao vota na propria proposta.';
   }
 
   if (proposal.status === 'em-revisao') {
@@ -150,6 +175,204 @@ export function buildVoteLockReason({ proposal, citizen, address, hasVoted, dead
   return null;
 }
 
+export function authorizeAction(store, { action, address, proposal, law, bairroId }) {
+  const citizen = address ? findCitizen(store, address) : null;
+
+  switch (action) {
+    case 'solicitar_cidadania':
+      if (!address) {
+        return {
+          allowed: false,
+          reason: 'Conecte e autentique uma carteira antes de solicitar cidadania.',
+        };
+      }
+
+      if (citizen?.ativo) {
+        return {
+          allowed: false,
+          reason: 'Esta carteira ja possui cidadania territorial ativa.',
+        };
+      }
+
+      return {
+        allowed: true,
+        reason: null,
+      };
+
+    case 'propor':
+      if (!address) {
+        return {
+          allowed: false,
+          reason: 'Conecte e autentique uma carteira antes de publicar uma proposta.',
+        };
+      }
+
+      if (!citizen?.ativo) {
+        return {
+          allowed: false,
+          reason: 'Somente cidadaos com cidadania ativa podem propor alteracoes normativas.',
+        };
+      }
+
+      return {
+        allowed: true,
+        reason: null,
+      };
+
+    case 'votar': {
+      if (!proposal) {
+        return {
+          allowed: false,
+          reason: 'A proposta informada nao existe para votacao.',
+        };
+      }
+
+      const hasVoted = Boolean(
+        citizen &&
+          proposal.votes.some((vote) => sameAddress(vote.address, citizen.address)),
+      );
+      const reason = buildVoteLockReason({
+        proposal,
+        citizen,
+        address,
+        hasVoted,
+        deadlineReached: proposalDeadlineReached(proposal),
+      });
+
+      return {
+        allowed: reason === null,
+        reason,
+      };
+    }
+
+    case 'comentar':
+      if (!address) {
+        return {
+          allowed: false,
+          reason: 'Conecte e autentique uma carteira antes de comentar.',
+        };
+      }
+
+      if (!citizen?.ativo) {
+        return {
+          allowed: false,
+          reason: 'A cidadania ativa e obrigatoria para comentar no processo legislativo.',
+        };
+      }
+
+      return {
+        allowed: true,
+        reason: null,
+      };
+
+    case 'criar_variacao':
+      if (!address) {
+        return {
+          allowed: false,
+          reason: 'Conecte e autentique uma carteira antes de abrir uma variacao territorial.',
+        };
+      }
+
+      if (!citizen?.ativo) {
+        return {
+          allowed: false,
+          reason: 'A cidadania ativa e obrigatoria para abrir uma variacao territorial.',
+        };
+      }
+
+      if (bairroId && citizen.bairroId !== bairroId) {
+        return {
+          allowed: false,
+          reason: 'A variacao precisa ser aberta para o bairro da cidadania ativa.',
+        };
+      }
+
+      if (!proposal) {
+        return {
+          allowed: false,
+          reason:
+            'A abertura da variacao depende de uma proposta territorial aprovada que autorize o experimento local.',
+        };
+      }
+
+      if (!isVariationAuthorizationProposal(proposal)) {
+        return {
+          allowed: false,
+          reason:
+            'A variacao territorial so pode nascer de uma proposta especifica de autorizacao territorial.',
+        };
+      }
+
+      if (proposal.status !== 'aprovado') {
+        return {
+          allowed: false,
+          reason:
+            'A variacao territorial so pode ser ativada depois que a proposta de autorizacao for aprovada.',
+        };
+      }
+
+      if (!proposal.variationDraft) {
+        return {
+          allowed: false,
+          reason:
+            'A proposta aprovada nao traz os dados minimos da variacao territorial para ativacao.',
+        };
+      }
+
+      if (!proposal.impactedNeighborhoodIds.includes(citizen.bairroId)) {
+        return {
+          allowed: false,
+          reason:
+            'A variacao so pode ser ativada por cidadania do bairro autorizado na proposta territorial.',
+        };
+      }
+
+      if (law?.isFork) {
+        return {
+          allowed: false,
+          reason: 'A variacao territorial deve partir de uma lei base municipal, nao de outra variacao.',
+        };
+      }
+
+      return {
+        allowed: true,
+        reason: null,
+      };
+
+    default:
+      return {
+        allowed: false,
+        reason: 'Acao institucional nao reconhecida.',
+      };
+  }
+}
+
+export function buildProposalAvailableActions(store, proposal, address) {
+  const law = findLaw(store, proposal.leiAlvoId);
+  const bairroId = proposal.variationDraft?.bairroId ?? proposal.bairroId;
+
+  return [
+    {
+      action: 'votar',
+      ...authorizeAction(store, { action: 'votar', address, proposal }),
+    },
+    {
+      action: 'comentar',
+      ...authorizeAction(store, { action: 'comentar', address, proposal }),
+    },
+    {
+      action: 'criar_variacao',
+      ...authorizeAction(store, {
+        action: 'criar_variacao',
+        address,
+        proposal,
+        law,
+        bairroId,
+      }),
+    },
+  ];
+}
+
 export function calculateVoteWeight(store, citizen, proposal) {
   if (!citizen) {
     return 0;
@@ -173,6 +396,7 @@ export function calculateVoteWeight(store, citizen, proposal) {
 
 export function buildProposalView(store, proposal, address) {
   const citizen = address ? findCitizen(store, address) : null;
+  const kind = resolveProposalKind(proposal);
   const hasVoted = Boolean(
     citizen &&
       proposal.votes.some((vote) => sameAddress(vote.address, citizen.address)),
@@ -190,7 +414,10 @@ export function buildProposalView(store, proposal, address) {
 
   return {
     ...proposal,
+    kind,
     tally,
+    workflowStage: resolveProposalWorkflowStage(proposal),
+    availableActions: buildProposalAvailableActions(store, proposal, address),
     currentUserWeight: citizen ? calculateVoteWeight(store, citizen, proposal) : 0,
     hasVoted,
     canVote,
@@ -306,10 +533,43 @@ export function createActivity(store, {
   });
 }
 
+export function recordDomainEvent(store, {
+  type,
+  actorAddress = null,
+  entityType,
+  entityId,
+  payload = {},
+  occurredAt = nowIso(),
+}) {
+  ensureStoreCollections(store);
+  store.events.push({
+    id: nextNumericId('event', store.events),
+    type,
+    actorAddress,
+    entityType,
+    entityId,
+    occurredAt,
+    payload,
+  });
+}
+
 export function rejectProposal(store, proposal, reason, timestamp) {
   proposal.status = 'rejeitado';
   proposal.closedAt = timestamp;
   proposal.resolutionReason = reason;
+
+  recordDomainEvent(store, {
+    type: 'ProposalRejected',
+    actorAddress: proposal.autor,
+    entityType: 'proposta',
+    entityId: proposal.id,
+    occurredAt: timestamp,
+    payload: {
+      reason,
+      leiId: proposal.leiAlvoId,
+      workflowStage: resolveProposalWorkflowStage(proposal),
+    },
+  });
 
   store.citizens.forEach((citizen) => {
     createActivity(store, {
@@ -347,18 +607,21 @@ export function evaluateCi(_law, article, newText) {
 
 export function resolveProposalStatus(store, proposal) {
   const tally = buildProposalTally(proposal);
-  if (proposal.status === 'aprovado' || proposal.status === 'rejeitado') {
+  const transition = resolveProposalLifecycleTransition({
+    proposal,
+    tally,
+    deadlineReached: proposalDeadlineReached(proposal),
+  });
+
+  if (!transition) {
     return;
   }
 
-  if (tally.total < proposal.quorum) {
-    return;
-  }
-
-  proposal.closedAt = nowIso();
-  if (tally.favor > tally.contra) {
-    proposal.status = 'aprovado';
-    proposal.resolutionReason = 'aprovado_por_quorum';
+  const timestamp = nowIso();
+  proposal.closedAt = timestamp;
+  if (transition.toStatus === 'aprovado') {
+    proposal.status = transition.toStatus;
+    proposal.resolutionReason = transition.resolutionReason;
     applyApprovedProposal(store, proposal);
     return;
   }
@@ -366,8 +629,8 @@ export function resolveProposalStatus(store, proposal) {
   rejectProposal(
     store,
     proposal,
-    tally.favor === tally.contra ? 'empate' : 'maioria_contra',
-    proposal.closedAt,
+    transition.resolutionReason,
+    timestamp,
   );
 }
 
@@ -376,32 +639,21 @@ export function syncProposalLifecycles(store) {
   let changed = false;
 
   store.proposals.forEach((proposal) => {
-    if (proposal.status === 'aprovado' || proposal.status === 'rejeitado') {
-      return;
-    }
-
-    if (proposal.status === 'em-revisao') {
-      if (!proposalDeadlineReached(proposal, nowTimestamp)) {
-        return;
-      }
-
-      rejectProposal(store, proposal, 'bloqueio_ci', nowIso());
-      changed = true;
-      return;
-    }
-
     const tally = buildProposalTally(proposal);
-    const shouldFinalize =
-      tally.total >= proposal.quorum || proposalDeadlineReached(proposal, nowTimestamp);
+    const transition = resolveProposalLifecycleTransition({
+      proposal,
+      tally,
+      deadlineReached: proposalDeadlineReached(proposal, nowTimestamp),
+    });
 
-    if (!shouldFinalize) {
+    if (!transition) {
       return;
     }
 
-    if (tally.total >= proposal.quorum && tally.favor > tally.contra) {
-      proposal.status = 'aprovado';
+    if (transition.toStatus === 'aprovado') {
+      proposal.status = transition.toStatus;
       proposal.closedAt = nowIso();
-      proposal.resolutionReason = 'aprovado_por_quorum';
+      proposal.resolutionReason = transition.resolutionReason;
       applyApprovedProposal(store, proposal);
       changed = true;
       return;
@@ -410,11 +662,7 @@ export function syncProposalLifecycles(store) {
     rejectProposal(
       store,
       proposal,
-      tally.total < proposal.quorum
-        ? 'quorum_insuficiente'
-        : tally.favor === tally.contra
-          ? 'empate'
-          : 'maioria_contra',
+      transition.resolutionReason,
       nowIso(),
     );
     changed = true;
@@ -424,6 +672,39 @@ export function syncProposalLifecycles(store) {
 }
 
 function applyApprovedProposal(store, proposal) {
+  if (isVariationAuthorizationProposal(proposal)) {
+    const timestamp = proposal.closedAt ?? nowIso();
+    const variationDraft = proposal.variationDraft;
+
+    recordDomainEvent(store, {
+      type: 'ProposalApproved',
+      actorAddress: proposal.autor,
+      entityType: 'proposta',
+      entityId: proposal.id,
+      occurredAt: timestamp,
+      payload: {
+        leiId: proposal.leiAlvoId,
+        workflowStage: resolveProposalWorkflowStage(proposal),
+        kind: 'variacao_local',
+        bairroId: variationDraft?.bairroId ?? proposal.bairroId,
+      },
+    });
+
+    store.citizens.forEach((citizen) => {
+      createActivity(store, {
+        address: citizen.address,
+        tipo: 'pr_aprovado',
+        titulo: `Variacao autorizada: ${proposal.id}`,
+        descricao: `${proposal.titulo} autorizou a abertura de uma variacao local em ${variationDraft?.bairroNome ?? proposal.bairroNome}.`,
+        link: `/propostas/${proposal.id}`,
+        data: timestamp,
+        lida: sameAddress(citizen.address, proposal.autor),
+      });
+    });
+
+    return;
+  }
+
   const law = must(findLaw(store, proposal.leiAlvoId), 'Lei alvo nao encontrada.');
   const article = must(
     law.artigos.find((item) => item.id === proposal.artigoAlvoId),
@@ -461,6 +742,33 @@ function applyApprovedProposal(store, proposal) {
   law.atualizadaEm = timestamp;
   law.commitIds.push(commit.id);
   store.commits.push(commit);
+
+  recordDomainEvent(store, {
+    type: 'ProposalApproved',
+    actorAddress: proposal.autor,
+    entityType: 'proposta',
+    entityId: proposal.id,
+    occurredAt: timestamp,
+    payload: {
+      leiId: law.id,
+      commitId: commit.id,
+      versao: nextVersion,
+      workflowStage: resolveProposalWorkflowStage(proposal),
+    },
+  });
+
+  recordDomainEvent(store, {
+    type: 'LawCommitRecorded',
+    actorAddress: proposal.autor,
+    entityType: 'lei',
+    entityId: law.id,
+    occurredAt: timestamp,
+    payload: {
+      proposalId: proposal.id,
+      commitId: commit.id,
+      versao: nextVersion,
+    },
+  });
 
   store.citizens.forEach((citizen) => {
     createActivity(store, {

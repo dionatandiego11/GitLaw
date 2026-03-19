@@ -26,9 +26,10 @@ function formatScore(value: number) {
 export function PRDetalhe() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { proposals, currentCitizen, voteProposal, addComment } = useApp();
+  const { proposals, forks, currentCitizen, voteProposal, addComment, createFork } = useApp();
   const [comment, setComment] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [isActivatingVariation, setIsActivatingVariation] = useState(false);
   const pr = proposals.find((proposal) => proposal.id === id);
 
   if (!pr) {
@@ -50,13 +51,31 @@ export function PRDetalhe() {
   };
 
   const config = statusConfig[pr.status];
-  const newVersionHref = `/propostas/nova?lawId=${pr.leiAlvoId}&articleId=${pr.artigoAlvoId}&proposalId=${pr.id}`;
+  const isVariationProposal = pr.kind === 'variacao_local';
+  const newVersionHref = pr.artigoAlvoId
+    ? `/propostas/nova?lawId=${pr.leiAlvoId}&articleId=${pr.artigoAlvoId}&proposalId=${pr.id}`
+    : null;
+  const isAuthor = Boolean(
+    currentCitizen && currentCitizen.address.toLowerCase() === pr.autor.toLowerCase(),
+  );
+  const activatedFork = forks.find((fork) => fork.sourceProposalId === pr.id);
+  const canActivateVariation = Boolean(
+    currentCitizen &&
+      isVariationProposal &&
+      pr.status === 'aprovado' &&
+      pr.impactedNeighborhoodIds.includes(currentCitizen.bairroId) &&
+      !activatedFork,
+  );
   const governanceSummary =
     pr.status === 'aberto'
       ? `Votação aberta até ${formatDistanceToNow(new Date(pr.votingEndsAt), { addSuffix: true, locale: ptBR })}.`
       : pr.status === 'em-revisao'
         ? 'A validação técnica bloqueou a etapa de votação até que o texto seja ajustado.'
-        : resolutionText[pr.resolutionReason ?? 'quorum_insuficiente'];
+        : isVariationProposal && pr.status === 'aprovado'
+          ? activatedFork
+            ? 'A autorização territorial foi aprovada e a variação local já está ativa.'
+            : 'A autorização territorial foi aprovada. O bairro autorizado já pode ativar a variação local.'
+          : resolutionText[pr.resolutionReason ?? 'quorum_insuficiente'];
   const timelineLabel = pr.closedAt
     ? `Encerrada ${formatDistanceToNow(new Date(pr.closedAt), { addSuffix: true, locale: ptBR })}`
     : pr.deadlineReached
@@ -89,6 +108,23 @@ export function PRDetalhe() {
       setComment('');
     } catch (nextError) {
       setError(nextError instanceof Error ? nextError.message : 'Não foi possível publicar o comentário.');
+    }
+  };
+
+  const handleActivateVariation = async () => {
+    if (!canActivateVariation) {
+      return;
+    }
+
+    try {
+      setIsActivatingVariation(true);
+      setError(null);
+      const fork = await createFork({ sourceProposalId: pr.id });
+      navigate(`/bairros/${fork.bairroId}`);
+    } catch (nextError) {
+      setError(nextError instanceof Error ? nextError.message : 'Não foi possível ativar a variação.');
+    } finally {
+      setIsActivatingVariation(false);
     }
   };
 
@@ -169,11 +205,15 @@ export function PRDetalhe() {
             <div>
               <h2 className="text-sm font-semibold text-[var(--color-git-text)]">Ações desta proposta</h2>
               <p className="mt-1 text-sm leading-relaxed text-[var(--color-git-muted)]">
-                Vote agora, proponha uma nova versão do texto ou crie uma variação local a partir desta lei.
+                {isAuthor
+                  ? 'Como autor, voce acompanha comentarios e pode abrir nova versao, mas nao participa da votacao desta proposta.'
+                  : isVariationProposal
+                  ? 'Vote na autorização territorial e, depois da aprovação, ative a variação local no bairro autorizado.'
+                  : 'Vote agora, proponha uma nova versão do texto ou abra uma autorização territorial para o seu bairro.'}
               </p>
             </div>
             <Badge variant={pr.canVote ? 'success' : 'outline'}>
-              {pr.canVote ? 'votação liberada' : 'ações limitadas'}
+              {pr.canVote ? 'votação liberada' : isVariationProposal && activatedFork ? 'variação ativa' : 'ações limitadas'}
             </Badge>
           </div>
 
@@ -183,47 +223,70 @@ export function PRDetalhe() {
             </div>
           ) : null}
 
-          <div className="mt-4 grid grid-cols-3 gap-3">
-            <button
-              onClick={() => void handleVote('contra')}
-              disabled={!pr.canVote}
-              className="rounded-xl border border-[var(--color-git-red)] bg-[var(--color-git-bg)] py-3 text-sm font-medium text-[var(--color-git-red)] transition-colors hover:bg-[var(--color-git-bg3)] disabled:opacity-50"
-            >
-              Reprovar
-            </button>
-            <button
-              onClick={() => void handleVote('abster')}
-              disabled={!pr.canVote}
-              className="rounded-xl border border-[var(--color-git-border2)] bg-[var(--color-git-bg3)] py-3 text-sm font-medium text-[var(--color-git-text)] transition-colors hover:bg-[var(--color-git-border2)] disabled:opacity-50"
-            >
-              Abster-se
-            </button>
-            <button
-              onClick={() => void handleVote('favor')}
-              disabled={!pr.canVote}
-              className="rounded-xl border border-[rgba(63,185,80,0.5)] bg-[var(--color-git-green)] py-3 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-50"
-            >
-              Aprovar
-            </button>
-          </div>
+          {isAuthor ? (
+            <div className="mt-4 rounded-xl border border-[var(--color-git-border)] bg-[var(--color-git-bg)] px-3 py-3 text-sm text-[var(--color-git-muted)]">
+              Seu papel aqui e acompanhar a discussao, responder comentarios e publicar uma nova versao, se necessario.
+            </div>
+          ) : (
+            <div className="mt-4 grid grid-cols-3 gap-3">
+              <button
+                onClick={() => void handleVote('contra')}
+                disabled={!pr.canVote}
+                className="rounded-xl border border-[var(--color-git-red)] bg-[var(--color-git-bg)] py-3 text-sm font-medium text-[var(--color-git-red)] transition-colors hover:bg-[var(--color-git-bg3)] disabled:opacity-50"
+              >
+                Reprovar
+              </button>
+              <button
+                onClick={() => void handleVote('abster')}
+                disabled={!pr.canVote}
+                className="rounded-xl border border-[var(--color-git-border2)] bg-[var(--color-git-bg3)] py-3 text-sm font-medium text-[var(--color-git-text)] transition-colors hover:bg-[var(--color-git-border2)] disabled:opacity-50"
+              >
+                Abster-se
+              </button>
+              <button
+                onClick={() => void handleVote('favor')}
+                disabled={!pr.canVote}
+                className="rounded-xl border border-[rgba(63,185,80,0.5)] bg-[var(--color-git-green)] py-3 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+              >
+                Aprovar
+              </button>
+            </div>
+          )}
 
           <div className="mt-3 grid grid-cols-1 gap-3">
-            <Link
-              to={newVersionHref}
-              className="flex items-center justify-center gap-2 rounded-xl border border-[var(--color-git-border2)] bg-[rgba(255,255,255,0.03)] px-4 py-3 text-sm font-medium text-[var(--color-git-text)] transition-colors hover:bg-[var(--color-git-bg3)]"
-            >
-              <GitPullRequest className="h-4 w-4" />
-              Criar nova versão
-            </Link>
+            {newVersionHref ? (
+              <Link
+                to={newVersionHref}
+                className="flex items-center justify-center gap-2 rounded-xl border border-[var(--color-git-border2)] bg-[rgba(255,255,255,0.03)] px-4 py-3 text-sm font-medium text-[var(--color-git-text)] transition-colors hover:bg-[var(--color-git-bg3)]"
+              >
+                <GitPullRequest className="h-4 w-4" />
+                Criar nova versão
+              </Link>
+            ) : null}
 
-            {currentCitizen ? (
+            {!isVariationProposal && currentCitizen ? (
               <Link
                 to={`/leis/${pr.leiAlvoId}/fork`}
                 className="flex items-center justify-center gap-2 rounded-xl border border-[rgba(188,140,255,0.38)] bg-[rgba(188,140,255,0.08)] px-4 py-3 text-sm font-medium text-[var(--color-git-text)] transition-colors hover:bg-[rgba(188,140,255,0.14)]"
               >
                 <GitFork className="h-4 w-4 text-[var(--color-git-purple)]" />
-                Criar variação local
+                Propor variação local
               </Link>
+            ) : null}
+
+            {isVariationProposal ? (
+              <button
+                onClick={() => void handleActivateVariation()}
+                disabled={!canActivateVariation || isActivatingVariation}
+                className="flex items-center justify-center gap-2 rounded-xl border border-[rgba(188,140,255,0.38)] bg-[rgba(188,140,255,0.08)] px-4 py-3 text-sm font-medium text-[var(--color-git-text)] transition-colors hover:bg-[rgba(188,140,255,0.14)] disabled:opacity-50"
+              >
+                <GitFork className="h-4 w-4 text-[var(--color-git-purple)]" />
+                {activatedFork
+                  ? 'Variação já ativada'
+                  : isActivatingVariation
+                    ? 'Ativando variação...'
+                    : 'Ativar variação local'}
+              </button>
             ) : null}
           </div>
         </div>
@@ -238,48 +301,78 @@ export function PRDetalhe() {
           </Link>
         </div>
 
-        <div>
-          <h3 className="mb-3 text-sm font-mono font-medium uppercase tracking-wider text-[var(--color-git-muted)]">
-            Validação técnica
-          </h3>
-          <div className="grid grid-cols-1 gap-2 rounded-xl border border-[var(--color-git-border)] bg-[var(--color-git-bg2)] p-3">
-            <div className="flex items-center justify-between border-b border-[var(--color-git-border2)] py-1 last:border-0">
-              <span className="text-xs text-[var(--color-git-text)]">Conflito com outras leis</span>
-              <CIStatus status={pr.ci.conflito} label={pr.ci.conflito ? 'Passou' : 'Falhou'} />
-            </div>
-            <div className="flex items-center justify-between border-b border-[var(--color-git-border2)] py-1 last:border-0">
-              <span className="text-xs text-[var(--color-git-text)]">Impacto orçamentário</span>
-              <CIStatus status={pr.ci.orcamento} label={pr.ci.orcamento ? 'Passou' : 'Falhou'} />
-            </div>
-            <div className="flex items-center justify-between border-b border-[var(--color-git-border2)] py-1 last:border-0">
-              <span className="text-xs text-[var(--color-git-text)]">Constitucionalidade</span>
-              <CIStatus status={pr.ci.constitucional} label={pr.ci.constitucional ? 'Passou' : 'Falhou'} />
-            </div>
-            <div className="flex items-center justify-between border-b border-[var(--color-git-border2)] py-1 last:border-0">
-              <span className="text-xs text-[var(--color-git-text)]">Redação técnica</span>
-              <CIStatus
-                status={pr.ci.redacao}
-                label={pr.ci.redacao === null ? 'Em análise' : pr.ci.redacao ? 'Passou' : 'Falhou'}
-              />
+        {isVariationProposal ? (
+          <div>
+            <h3 className="mb-3 text-sm font-mono font-medium uppercase tracking-wider text-[var(--color-git-muted)]">
+              Termos da variação
+            </h3>
+            <div className="grid grid-cols-1 gap-3 rounded-xl border border-[var(--color-git-border)] bg-[var(--color-git-bg2)] p-4">
+              <div className="rounded-2xl border border-[var(--color-git-border)] bg-[var(--color-git-bg3)]/65 p-3">
+                <div className="text-[10px] uppercase tracking-[0.14em] text-[var(--color-git-muted)]">Nome previsto</div>
+                <div className="mt-1 text-sm font-medium text-[var(--color-git-text)]">{pr.variationDraft?.nome ?? 'Variação territorial'}</div>
+              </div>
+              <div className="rounded-2xl border border-[var(--color-git-border)] bg-[var(--color-git-bg3)]/65 p-3">
+                <div className="text-[10px] uppercase tracking-[0.14em] text-[var(--color-git-muted)]">Objetivo</div>
+                <div className="mt-1 text-sm leading-relaxed text-[var(--color-git-text)]">{pr.variationDraft?.objetivo ?? pr.justificativa}</div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="rounded-2xl border border-[var(--color-git-border)] bg-[var(--color-git-bg3)]/65 p-3">
+                  <div className="text-[10px] uppercase tracking-[0.14em] text-[var(--color-git-muted)]">Bairro autorizado</div>
+                  <div className="mt-1 text-sm font-medium text-[var(--color-git-text)]">{pr.variationDraft?.bairroNome ?? pr.bairroNome}</div>
+                </div>
+                <div className="rounded-2xl border border-[var(--color-git-border)] bg-[var(--color-git-bg3)]/65 p-3">
+                  <div className="text-[10px] uppercase tracking-[0.14em] text-[var(--color-git-muted)]">Duração prevista</div>
+                  <div className="mt-1 text-sm font-medium text-[var(--color-git-text)]">{pr.variationDraft?.duracaoMeses ?? 0} meses</div>
+                </div>
+              </div>
             </div>
           </div>
+        ) : (
+          <>
+            <div>
+              <h3 className="mb-3 text-sm font-mono font-medium uppercase tracking-wider text-[var(--color-git-muted)]">
+                Validação técnica
+              </h3>
+              <div className="grid grid-cols-1 gap-2 rounded-xl border border-[var(--color-git-border)] bg-[var(--color-git-bg2)] p-3">
+                <div className="flex items-center justify-between border-b border-[var(--color-git-border2)] py-1 last:border-0">
+                  <span className="text-xs text-[var(--color-git-text)]">Conflito com outras leis</span>
+                  <CIStatus status={pr.ci.conflito} label={pr.ci.conflito ? 'Passou' : 'Falhou'} />
+                </div>
+                <div className="flex items-center justify-between border-b border-[var(--color-git-border2)] py-1 last:border-0">
+                  <span className="text-xs text-[var(--color-git-text)]">Impacto orçamentário</span>
+                  <CIStatus status={pr.ci.orcamento} label={pr.ci.orcamento ? 'Passou' : 'Falhou'} />
+                </div>
+                <div className="flex items-center justify-between border-b border-[var(--color-git-border2)] py-1 last:border-0">
+                  <span className="text-xs text-[var(--color-git-text)]">Constitucionalidade</span>
+                  <CIStatus status={pr.ci.constitucional} label={pr.ci.constitucional ? 'Passou' : 'Falhou'} />
+                </div>
+                <div className="flex items-center justify-between border-b border-[var(--color-git-border2)] py-1 last:border-0">
+                  <span className="text-xs text-[var(--color-git-text)]">Redação técnica</span>
+                  <CIStatus
+                    status={pr.ci.redacao}
+                    label={pr.ci.redacao === null ? 'Em análise' : pr.ci.redacao ? 'Passou' : 'Falhou'}
+                  />
+                </div>
+              </div>
 
-          {pr.status === 'em-revisao' ? (
-            <div className="mt-3 flex items-start gap-3 rounded-xl border border-[rgba(210,153,34,0.32)] bg-[rgba(210,153,34,0.08)] p-4">
-              <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-[var(--color-git-amber)]" />
-              <p className="text-sm leading-relaxed text-[var(--color-git-text)]">
-                Esta proposta foi publicada, mas a votação fica travada enquanto houver bloqueio na validação técnica.
-              </p>
+              {pr.status === 'em-revisao' ? (
+                <div className="mt-3 flex items-start gap-3 rounded-xl border border-[rgba(210,153,34,0.32)] bg-[rgba(210,153,34,0.08)] p-4">
+                  <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-[var(--color-git-amber)]" />
+                  <p className="text-sm leading-relaxed text-[var(--color-git-text)]">
+                    Esta proposta foi publicada, mas a votação fica travada enquanto houver bloqueio na validação técnica.
+                  </p>
+                </div>
+              ) : null}
             </div>
-          ) : null}
-        </div>
 
-        <div>
-          <h3 className="mb-3 text-sm font-mono font-medium uppercase tracking-wider text-[var(--color-git-muted)]">
-            Comparação do texto
-          </h3>
-          <DiffViewer before={pr.oldText} after={pr.newText} title={pr.artigoAlvoRotulo} />
-        </div>
+            <div>
+              <h3 className="mb-3 text-sm font-mono font-medium uppercase tracking-wider text-[var(--color-git-muted)]">
+                Comparação do texto
+              </h3>
+              <DiffViewer before={pr.oldText ?? ''} after={pr.newText ?? ''} title={pr.artigoAlvoRotulo ?? 'Texto normativo'} />
+            </div>
+          </>
+        )}
 
         <div>
           <h3 className="mb-3 text-sm font-mono font-medium uppercase tracking-wider text-[var(--color-git-muted)]">

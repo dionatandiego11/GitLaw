@@ -138,8 +138,8 @@ export function Connect() {
                   <Wallet className="h-5 w-5 text-[#F6851B]" />
                 </div>
                 <div>
-                  <div className="text-sm font-semibold text-[var(--color-git-text)]">Conectar MetaMask</div>
-                  <div className="text-xs text-[var(--color-git-muted)]">Usar sua própria carteira para continuar</div>
+                  <div className="text-sm font-semibold text-[var(--color-git-text)]">Conectar e assinar MetaMask</div>
+                  <div className="text-xs text-[var(--color-git-muted)]">Usar sua própria carteira com assinatura de sessao</div>
                 </div>
               </div>
               <ArrowRight className="h-4 w-4 text-[var(--color-git-muted)] transition-transform group-hover:translate-x-0.5" />
@@ -147,7 +147,7 @@ export function Connect() {
           </div>
 
           {isConnecting ? (
-            <p className="mt-4 text-sm text-[var(--color-git-muted)]">Preparando seu acesso...</p>
+            <p className="mt-4 text-sm text-[var(--color-git-muted)]">Preparando e autenticando seu acesso...</p>
           ) : null}
           {error ? <p className="mt-4 text-sm text-[var(--color-git-red)]">{error}</p> : null}
         </section>
