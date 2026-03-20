@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import type { Variants } from 'motion/react';
 import { motion } from 'motion/react';
 import {
   ArrowRight,
@@ -25,6 +26,16 @@ import { cn } from '@/lib/utils';
 import type { Commit, ForkExperiment, Law, ProposalView } from '@/shared/domain';
 
 type BadgeVariant = 'default' | 'info' | 'success' | 'warning' | 'danger' | 'outline' | 'purple';
+
+const containerVariants: Variants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.09, delayChildren: 0.05 } },
+};
+
+const itemVariants: Variants = {
+  hidden:  { opacity: 0, y: 16, scale: 0.97 },
+  visible: { opacity: 1, y: 0,  scale: 1, transition: { type: 'spring', stiffness: 320, damping: 26 } },
+};
 type StepStatus = 'done' | 'current' | 'upcoming';
 
 interface HomeStep {
@@ -72,9 +83,12 @@ function formatRelativeDate(value: string) {
 
 function EmptyState({ children }: { children: ReactNode }) {
   return (
-    <div className="rounded-[24px] border border-dashed border-[var(--color-git-border2)] bg-[rgba(255,255,255,0.02)] p-4 text-sm leading-relaxed text-[var(--color-git-muted)]">
+    <motion.div
+      variants={itemVariants}
+      className="rounded-[20px] border border-dashed border-[var(--color-git-border2)] bg-[rgba(255,255,255,0.02)] p-5 text-sm leading-relaxed text-[var(--color-git-muted)] text-center"
+    >
       {children}
-    </div>
+    </motion.div>
   );
 }
 
@@ -92,11 +106,14 @@ function SectionHeading({
   return (
     <div className="flex items-start justify-between gap-3">
       <div>
-        <h2 className="text-base font-semibold text-[var(--color-git-text)]">{title}</h2>
-        <p className="mt-1 text-sm leading-relaxed text-[var(--color-git-muted)]">{description}</p>
+        <h2 className="text-base font-bold text-[var(--color-git-text)] tracking-tight">{title}</h2>
+        <p className="mt-0.5 text-[13px] leading-relaxed text-[var(--color-git-muted2)]">{description}</p>
       </div>
       {actionHref && actionLabel ? (
-        <Link to={actionHref} className="shrink-0 text-xs font-medium text-[var(--color-git-blue)]">
+        <Link
+          to={actionHref}
+          className="shrink-0 text-xs font-semibold text-[var(--color-git-blue)] hover:text-[var(--color-git-text)] transition-colors bg-[rgba(56,189,248,0.08)] border border-[rgba(56,189,248,0.2)] px-2.5 py-1 rounded-full"
+        >
           {actionLabel}
         </Link>
       ) : null}
@@ -164,73 +181,79 @@ function HomeStepCard({ step, title, description, status, href, actionLabel }: H
 }
 
 function QuickActionCard({ title, value, description, href, actionLabel, icon: Icon, tone }: QuickAction) {
-  const toneClasses = {
-    blue: 'border-[rgba(88,166,255,0.24)] bg-[rgba(88,166,255,0.06)]',
-    green: 'border-[rgba(63,185,80,0.24)] bg-[rgba(63,185,80,0.06)]',
-    purple: 'border-[rgba(188,140,255,0.24)] bg-[rgba(188,140,255,0.06)]',
-  } satisfies Record<QuickAction['tone'], string>;
+  const toneConfig = {
+    blue:   { border: 'rgba(56,189,248,0.25)',   bg: 'rgba(56,189,248,0.05)',   iconBg: 'rgba(56,189,248,0.14)',  iconBorder: 'rgba(56,189,248,0.28)',  iconColor: 'var(--color-git-blue)',   hoverBorder: 'rgba(56,189,248,0.45)',   glow: 'icon-glow-blue',   chip: 'chip-blue'   },
+    green:  { border: 'rgba(52,211,153,0.25)',   bg: 'rgba(52,211,153,0.05)',   iconBg: 'rgba(52,211,153,0.14)',  iconBorder: 'rgba(52,211,153,0.28)',  iconColor: 'var(--color-git-green)',  hoverBorder: 'rgba(52,211,153,0.45)',   glow: 'icon-glow-green',  chip: 'chip-green'  },
+    purple: { border: 'rgba(192,132,252,0.25)',  bg: 'rgba(192,132,252,0.05)',  iconBg: 'rgba(192,132,252,0.14)', iconBorder: 'rgba(192,132,252,0.28)', iconColor: 'var(--color-git-purple)', hoverBorder: 'rgba(192,132,252,0.45)', glow: 'icon-glow-purple', chip: 'chip-purple' },
+  } satisfies Record<QuickAction['tone'], { border: string; bg: string; iconBg: string; iconBorder: string; iconColor: string; hoverBorder: string; glow: string; chip: string }>;
 
-  const iconClasses = {
-    blue: 'border-[rgba(88,166,255,0.3)] bg-[rgba(88,166,255,0.16)] text-[var(--color-git-blue)]',
-    green: 'border-[rgba(63,185,80,0.3)] bg-[rgba(63,185,80,0.16)] text-[var(--color-git-green)]',
-    purple: 'border-[rgba(188,140,255,0.3)] bg-[rgba(188,140,255,0.16)] text-[var(--color-git-purple)]',
-  } satisfies Record<QuickAction['tone'], string>;
+  const cfg = toneConfig[tone];
 
   return (
-    <Link
-      to={href}
-      className={cn(
-        'block rounded-[24px] border p-4 transition-colors hover:border-[rgba(255,255,255,0.2)]',
-        toneClasses[tone],
-      )}
-    >
-      <div className="flex items-start justify-between gap-3">
-        <div className={cn('flex h-10 w-10 items-center justify-center rounded-2xl border', iconClasses[tone])}>
-          <Icon className="h-5 w-5" />
+    <motion.div variants={itemVariants} whileHover={{ y: -2 }} transition={{ type: 'spring', stiffness: 400, damping: 22 }}>
+      <Link
+        to={href}
+        className="group block rounded-[22px] p-px overflow-hidden transition-all duration-300"
+        style={{ background: `linear-gradient(135deg, ${cfg.border}, rgba(255,255,255,0.05))` }}
+      >
+        <div
+          className="rounded-[21px] p-4 transition-all duration-300"
+          style={{ background: `linear-gradient(160deg, ${cfg.bg} 0%, var(--color-git-bg) 60%)` }}
+        >
+          <div className="flex items-start justify-between gap-3">
+            <div
+              className={cn('flex h-10 w-10 items-center justify-center rounded-2xl', cfg.glow)}
+              style={{ background: cfg.iconBg, border: `1px solid ${cfg.iconBorder}`, color: cfg.iconColor }}
+            >
+              <Icon className="h-5 w-5" />
+            </div>
+            <ArrowRight className="mt-1 h-4 w-4 text-[var(--color-git-muted)] group-hover:translate-x-0.5 transition-transform" style={{ color: cfg.iconColor }} />
+          </div>
+
+          <div className="mt-4 text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--color-git-muted)]">{'< '}{title}</div>
+          <div className="mt-1 text-xl font-bold leading-tight text-[var(--color-git-text)]">{value}</div>
+          <p className="mt-1.5 text-[13px] leading-relaxed text-[var(--color-git-muted2)]">{description}</p>
+
+          <div className={cn('mt-4 inline-flex items-center gap-1 text-[11px] font-semibold', cfg.chip)}>
+            {actionLabel} →
+          </div>
         </div>
-        <ArrowRight className="mt-1 h-4 w-4 text-[var(--color-git-muted)]" />
-      </div>
-
-      <div className="mt-4 text-sm font-medium text-[var(--color-git-muted)]">{title}</div>
-      <div className="mt-1 text-xl font-semibold leading-tight text-[var(--color-git-text)]">{value}</div>
-      <p className="mt-2 text-sm leading-relaxed text-[var(--color-git-muted)]">{description}</p>
-
-      <div className="mt-4 text-xs font-medium text-[var(--color-git-blue)]">{actionLabel}</div>
-    </Link>
+      </Link>
+    </motion.div>
   );
 }
 
 function RecentUpdates({ items }: { items: HomeUpdate[] }) {
   if (items.length === 0) {
-    return <EmptyState>Nenhuma atualizacao recente para resumir agora.</EmptyState>;
+    return <EmptyState>Nenhuma atualização recente para resumir agora.</EmptyState>;
   }
 
   return (
-    <div className="space-y-3">
+    <motion.div className="space-y-2.5" variants={containerVariants} initial="hidden" animate="visible">
       {items.map((item) => {
         const Icon = item.icon;
-
         return (
-          <Link
-            key={item.id}
-            to={item.href}
-            className="flex items-start gap-3 rounded-[22px] border border-[var(--color-git-border)] bg-[rgba(255,255,255,0.03)] p-4 transition-colors hover:border-[rgba(88,166,255,0.32)]"
-          >
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-[var(--color-git-border)] bg-[var(--color-git-bg3)] text-[var(--color-git-muted)]">
-              <Icon className="h-4.5 w-4.5" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <div className="flex flex-wrap items-center gap-2">
-                <Badge variant={item.typeVariant}>{item.typeLabel}</Badge>
-                <span className="text-[11px] text-[var(--color-git-muted)]">{formatRelativeDate(item.date)}</span>
+          <motion.div key={item.id} variants={itemVariants} whileHover={{ x: 2 }} transition={{ type: 'spring', stiffness: 400, damping: 28 }}>
+            <Link
+              to={item.href}
+              className="group flex items-start gap-3 rounded-[18px] border border-[var(--color-git-border)] bg-[rgba(255,255,255,0.025)] p-4 transition-all duration-300 hover:border-[rgba(56,189,248,0.28)] hover:bg-[rgba(56,189,248,0.03)]"
+            >
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-[var(--color-git-border)] bg-[var(--color-git-bg3)] text-[var(--color-git-muted)] group-hover:border-[rgba(56,189,248,0.25)] group-hover:text-[var(--color-git-blue)] transition-all">
+                <Icon className="h-4 w-4" />
               </div>
-              <h3 className="mt-2 text-sm font-semibold leading-tight text-[var(--color-git-text)]">{item.title}</h3>
-              <p className="mt-1 text-sm leading-relaxed text-[var(--color-git-muted)]">{item.description}</p>
-            </div>
-          </Link>
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <Badge variant={item.typeVariant}>{item.typeLabel}</Badge>
+                  <span className="text-[10px] text-[var(--color-git-muted)]">{formatRelativeDate(item.date)}</span>
+                </div>
+                <h3 className="mt-1.5 text-[13px] font-semibold leading-snug text-[var(--color-git-text)] group-hover:text-white transition-colors">{item.title}</h3>
+                <p className="mt-0.5 text-[12px] leading-relaxed text-[var(--color-git-muted2)] line-clamp-2">{item.description}</p>
+              </div>
+            </Link>
+          </motion.div>
         );
       })}
-    </div>
+    </motion.div>
   );
 }
 
@@ -426,14 +449,24 @@ export function Feed() {
 
   if (isLoading) {
     return (
-      <div className="p-4">
-        <EmptyState>Carregando um resumo mais simples do panorama local...</EmptyState>
+      <div className="p-4 space-y-4">
+        {[1,2,3].map((i) => (
+          <div key={i} className="rounded-[22px] overflow-hidden" style={{ animationDelay: `${i * 120}ms` }}>
+            <div className="skeleton h-40 rounded-[22px] mb-2" />
+            <div className="skeleton h-5 rounded-lg w-2/3" />
+          </div>
+        ))}
       </div>
     );
   }
 
   return (
-    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-6 p-4">
+    <motion.div
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+      className="space-y-6 p-4"
+    >
       <section className="overflow-hidden rounded-[32px] border border-[var(--color-git-border)] bg-[linear-gradient(180deg,rgba(88,166,255,0.12),rgba(13,17,23,0.98)_28%,rgba(13,17,23,1)_100%)] p-5">
         <div className="flex items-start justify-between gap-4">
           <div className="max-w-[22rem]">
@@ -484,12 +517,12 @@ export function Feed() {
         ) : null}
       </section>
 
-      <section className="space-y-3">
+      <motion.section variants={itemVariants} className="space-y-3">
         <SectionHeading
           title="Como funciona"
-          description="A jornada principal foi resumida em tres passos para ficar claro o que fazer primeiro."
+          description="A jornada principal foi resumida em três passos para ficar claro o que fazer primeiro."
         />
-        <div className="space-y-3">
+        <div className="space-y-2.5">
           {steps.map((step) => (
             <HomeStepCard
               key={step.step}
@@ -502,14 +535,14 @@ export function Feed() {
             />
           ))}
         </div>
-      </section>
+      </motion.section>
 
-      <section className="space-y-3">
+      <motion.section variants={itemVariants} className="space-y-3">
         <SectionHeading
-          title="Atalhos rapidos"
-          description="Tres portas de entrada para o que mais importa sem precisar varrer a aplicacao inteira."
+          title="Atalhos rápidos"
+          description="Três portas de entrada para o que mais importa."
         />
-        <div className="grid grid-cols-1 gap-3">
+        <motion.div className="grid grid-cols-1 gap-2.5" variants={containerVariants}>
           {quickActions.map((action) => (
             <QuickActionCard
               key={action.title}
@@ -522,28 +555,28 @@ export function Feed() {
               tone={action.tone}
             />
           ))}
-        </div>
-      </section>
+        </motion.div>
+      </motion.section>
 
-      <section className="space-y-3">
+      <motion.section variants={itemVariants} className="space-y-3">
         <SectionHeading
-          title="O que merece atencao agora"
+          title="Merece atenção agora"
           description={
             currentCitizen
-              ? 'Se voce for fazer so uma coisa hoje, comece por estas propostas.'
-              : 'Esses itens resumem o que esta acontecendo agora no piloto.'
+              ? 'Se você for fazer só uma coisa hoje, comece por estas propostas.'
+              : 'Esses itens resumem o que está acontecendo agora no piloto.'
           }
           actionHref="/propostas"
           actionLabel="ver todas"
         />
         {urgentProposals.length > 0 ? (
-          <div className="space-y-3">
+          <div className="space-y-2.5">
             {urgentProposals.slice(0, 2).map((proposal) => (
               <PRCard key={proposal.id} pr={proposal} />
             ))}
           </div>
         ) : recentProposals.length > 0 ? (
-          <div className="space-y-3">
+          <div className="space-y-2.5">
             {recentProposals.slice(0, 1).map((proposal) => (
               <PRCard key={proposal.id} pr={proposal} />
             ))}
@@ -551,17 +584,17 @@ export function Feed() {
         ) : (
           <EmptyState>Nenhuma proposta recente apareceu na curadoria inicial.</EmptyState>
         )}
-      </section>
+      </motion.section>
 
-      <section className="space-y-3">
+      <motion.section variants={itemVariants} className="space-y-3">
         <SectionHeading
           title="Mudou por aqui"
-          description="Atualizacoes recentes em formato curto para voce entender o panorama sem excesso de contexto."
+          description="Atualizações recentes em formato curto para você entender o panorama."
           actionHref="/atividade"
-          actionLabel="abrir atividade"
+          actionLabel="ver atividade"
         />
         <RecentUpdates items={recentUpdates} />
-      </section>
+      </motion.section>
 
       {!currentCitizen ? (
         <section className="rounded-[28px] border border-[var(--color-git-border)] bg-[rgba(255,255,255,0.03)] p-4">

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { ArrowLeft, GitCommit, GitCompare, History, GitPullRequest, GitFork } from 'lucide-react';
+import { ArrowLeft, GitCommit, GitCompare, History, GitPullRequest, GitFork, ShieldAlert, Lock } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -14,6 +14,7 @@ export function LeiDetalhe() {
   const [view, setView] = useState<'texto' | 'blame' | 'commits'>('texto');
   const lei = laws.find((law) => law.id === id);
   const lawCommits = commits.filter((commit) => lei?.commitIds.includes(commit.id));
+  const governance = lei?.governanca;
 
   if (!lei) return <div className="p-4 text-center text-[var(--color-git-muted)]">Lei não encontrada.</div>;
 
@@ -36,13 +37,40 @@ export function LeiDetalhe() {
 
       <div className="p-4 space-y-6">
         {/* Meta */}
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2 items-center">
+          {lei.isRoot && (
+            <div className="flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold tracking-wide" style={{ background: 'rgba(192,132,252,0.12)', border: '1px solid rgba(192,132,252,0.28)', color: 'var(--color-git-purple)' }}>
+              <ShieldAlert className="w-3 h-3" />
+              Repositório Raiz
+            </div>
+          )}
           <Badge variant="info">{lei.categoria}</Badge>
-          <Badge variant="outline">{lei.versao}</Badge>
+          <Badge variant="outline">v{lei.versao}</Badge>
+          {lei.isRoot && lei.quorumEspecial && (
+            <div className="flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold" style={{ background: 'rgba(251,191,36,0.1)', border: '1px solid rgba(251,191,36,0.25)', color: 'var(--color-git-amber)' }}>
+              <Lock className="w-3 h-3" />
+              {Math.round(lei.quorumEspecial * 100)}% quórum p/ alterar
+            </div>
+          )}
           <span className="text-xs text-[var(--color-git-muted)] flex items-center">
             Atualizado {formatDistanceToNow(new Date(lei.atualizadaEm), { addSuffix: true, locale: ptBR })}
           </span>
         </div>
+
+        {governance ? (
+          <div className="rounded-2xl border border-[var(--color-git-border)] bg-[var(--color-git-bg2)] p-4 space-y-2">
+            <h2 className="text-sm font-semibold text-[var(--color-git-text)]">Politica institucional do documento</h2>
+            <div className="grid grid-cols-1 gap-2 text-xs text-[var(--color-git-muted)]">
+              <p>Regra de aprovacao: <span className="text-[var(--color-git-text)]">{governance.approvalLabel}</span></p>
+              <p>Janela minima de debate: <span className="text-[var(--color-git-text)]">{governance.minimumVotingWindowDays} dias</span></p>
+              <p>Protecao institucional: <span className="text-[var(--color-git-text)]">{governance.codeownersLabel}</span></p>
+              <p>
+                Audiencia publica:
+                <span className="text-[var(--color-git-text)]"> {governance.requiresPublicHearing ? 'obrigatoria antes da publicacao' : 'nao obrigatoria'}</span>
+              </p>
+            </div>
+          </div>
+        ) : null}
 
         {/* Actions */}
         <div className="grid grid-cols-3 gap-2">
@@ -111,11 +139,19 @@ export function LeiDetalhe() {
 
         {/* Propose Action */}
         <div className="pt-6 border-t border-[var(--color-git-border)] space-y-3">
+          {lei.isRoot && (
+            <div className="flex items-start gap-2.5 rounded-[16px] p-3.5" style={{ background: 'rgba(251,191,36,0.06)', border: '1px solid rgba(251,191,36,0.2)' }}>
+              <Lock className="w-4 h-4 text-[var(--color-git-amber)] shrink-0 mt-0.5" />
+              <p className="text-[12px] leading-relaxed" style={{ color: 'rgba(251,191,36,0.85)' }}>
+                Este e um <strong>repositorio raiz</strong>. Propostas de emenda seguem protecao institucional de <strong>{governance?.codeownersLabel ?? 'quorum qualificado'}</strong> e exigem <strong>{Math.round((lei.quorumEspecial ?? 0.67) * 100)}%</strong> de quorum minimo.
+              </p>
+            </div>
+          )}
           <Link to={`/propostas/nova?lawId=${lei.id}`} className="flex items-center justify-center w-full py-3 bg-[var(--color-git-green)] hover:opacity-90 text-white rounded-xl font-medium transition-opacity gap-2 border border-[rgba(63,185,80,0.5)]">
             <GitPullRequest className="w-4 h-4" />
             Propor Emenda
           </Link>
-          {currentCitizen ? (
+          {currentCitizen && !lei.isRoot ? (
             <Link to={`/leis/${lei.id}/fork`} className="flex items-center justify-center w-full py-3 bg-[var(--color-git-purple)] hover:opacity-90 text-white rounded-xl font-medium transition-opacity gap-2 border border-[rgba(188,140,255,0.4)]">
               <GitFork className="w-4 h-4" />
               Propor variação para {currentCitizen.bairroNome}

@@ -34,12 +34,19 @@ export function NovaProposta() {
       ? `Revisão da proposta ${sourceProposal.id}. ${sourceProposal.justificativa}`
       : '',
   );
+  const [publicHearingRegistered, setPublicHearingRegistered] = useState(false);
+  const [publicHearingDate, setPublicHearingDate] = useState('');
+  const [publicHearingProtocol, setPublicHearingProtocol] = useState('');
   const [error, setError] = useState<string | null>(null);
 
   const selectableLaws =
     sourceProposal?.source === 'fork' ? laws : laws.filter((law) => !law.isFork);
   const selectedLaw = selectableLaws.find((law) => law.id === lawId) ?? selectableLaws[0];
   const selectedArticle = selectedLaw?.artigos.find((article) => article.id === articleId) ?? selectedLaw?.artigos[0];
+  const isRootLaw = Boolean(selectedLaw?.isRoot);
+  const rootLawQuorumPct = Math.round((selectedLaw?.quorumEspecial ?? 0) * 100);
+  const governance = selectedLaw?.governanca;
+  const requiresPublicHearing = Boolean(governance?.requiresPublicHearing);
 
   useEffect(() => {
     if (!lawId && selectedLaw) {
@@ -86,6 +93,20 @@ export function NovaProposta() {
     }
   }, [currentCitizen, impactedNeighborhoodIds.length]);
 
+  useEffect(() => {
+    if (!selectedLaw?.isRoot) {
+      return;
+    }
+
+    const municipalReach = neighborhoods.map((neighborhood) => neighborhood.id);
+    setImpactedNeighborhoodIds((current) =>
+      current.length === municipalReach.length &&
+      municipalReach.every((id) => current.includes(id))
+        ? current
+        : municipalReach,
+    );
+  }, [neighborhoods, selectedLaw?.id, selectedLaw?.isRoot]);
+
   const handleNext = () => setStep(s => Math.min(s + 1, 3));
   const handleBack = () => setStep(s => Math.max(s - 1, 1));
 
@@ -97,6 +118,14 @@ export function NovaProposta() {
 
     if (!title.trim() || !justification.trim() || newText.trim().length < 40) {
       setError('Preencha título, justificativa e uma proposta de texto com conteúdo suficiente.');
+      return;
+    }
+
+    if (
+      requiresPublicHearing &&
+      (!publicHearingRegistered || !publicHearingDate.trim() || !publicHearingProtocol.trim())
+    ) {
+      setError('Propostas sobre o Plano Diretor exigem audiencia publica registrada com data e protocolo.');
       return;
     }
 
@@ -113,6 +142,11 @@ export function NovaProposta() {
         impactedNeighborhoodIds,
         issueId,
         urgency,
+        governance: {
+          publicHearingRegistered,
+          publicHearingDate,
+          publicHearingProtocol,
+        },
       });
       navigate(`/propostas/${proposal.id}`);
     } catch (nextError) {
@@ -145,6 +179,10 @@ export function NovaProposta() {
   const willOpenVoting = ciPreview.conflito && ciPreview.constitucional;
 
   const toggleNeighborhood = (id: string) => {
+    if (selectedLaw?.isRoot) {
+      return;
+    }
+
     setImpactedNeighborhoodIds((current) =>
       current.includes(id) ? current.filter((item) => item !== id) : [...current, id],
     );
@@ -218,19 +256,67 @@ export function NovaProposta() {
                   ))}
                 </select>
               </div>
+              {isRootLaw ? (
+                <div className="rounded-2xl border border-[rgba(251,191,36,0.22)] bg-[rgba(251,191,36,0.08)] p-3 text-sm text-[var(--color-git-text)]">
+                  <p className="font-medium">Repositorio raiz selecionado</p>
+                  <p className="mt-1 text-[var(--color-git-muted)]">
+                    Emendas sobre {selectedLaw?.titulo} tem alcance municipal automatico, janela minima de {governance?.minimumVotingWindowDays ?? 14} dias e exigem {governance?.approvalLabel ?? `quorum qualificado de ${rootLawQuorumPct}% dos cidadaos ativos`}.
+                  </p>
+                </div>
+              ) : null}
+              {requiresPublicHearing ? (
+                <div className="space-y-3 rounded-2xl border border-[rgba(56,189,248,0.22)] bg-[rgba(56,189,248,0.08)] p-3">
+                  <div>
+                    <p className="text-sm font-medium text-[var(--color-git-text)]">Audiencia publica obrigatoria</p>
+                    <p className="mt-1 text-xs text-[var(--color-git-muted)]">
+                      O Plano Diretor so pode seguir com audiencia publica registrada antes da publicacao da proposta.
+                    </p>
+                  </div>
+                  <label className="flex items-center gap-2 text-sm text-[var(--color-git-muted)]">
+                    <input
+                      type="checkbox"
+                      checked={publicHearingRegistered}
+                      onChange={(event) => setPublicHearingRegistered(event.target.checked)}
+                    />
+                    Confirmo que a audiencia publica ja foi registrada
+                  </label>
+                  <div className="grid grid-cols-1 gap-3">
+                    <input
+                      value={publicHearingDate}
+                      onChange={(event) => setPublicHearingDate(event.target.value)}
+                      type="date"
+                      className="w-full px-3 py-2.5 bg-[var(--color-git-bg2)] border border-[var(--color-git-border)] focus:border-[var(--color-git-blue)] focus:ring-1 focus:ring-[var(--color-git-blue)] rounded-xl text-sm text-[var(--color-git-text)] outline-none transition-all"
+                    />
+                    <input
+                      value={publicHearingProtocol}
+                      onChange={(event) => setPublicHearingProtocol(event.target.value)}
+                      type="text"
+                      placeholder="Protocolo do edital ou audiencia"
+                      className="w-full px-3 py-2.5 bg-[var(--color-git-bg2)] border border-[var(--color-git-border)] focus:border-[var(--color-git-blue)] focus:ring-1 focus:ring-[var(--color-git-blue)] rounded-xl text-sm text-[var(--color-git-text)] outline-none transition-all placeholder:text-[var(--color-git-muted)]"
+                    />
+                  </div>
+                </div>
+              ) : null}
               <div>
                 <label className="block text-xs font-medium text-[var(--color-git-muted)] mb-1.5 uppercase tracking-wider">Tema relacionado (opcional)</label>
                 <input value={issueId} onChange={(event) => setIssueId(event.target.value)} type="text" placeholder="#12 - Problemas de acessibilidade" className="w-full px-3 py-2.5 bg-[var(--color-git-bg2)] border border-[var(--color-git-border)] focus:border-[var(--color-git-blue)] focus:ring-1 focus:ring-[var(--color-git-blue)] rounded-xl text-sm text-[var(--color-git-text)] outline-none transition-all placeholder:text-[var(--color-git-muted)]" />
               </div>
               <div>
-                <label className="block text-xs font-medium text-[var(--color-git-muted)] mb-1.5 uppercase tracking-wider">Bairros impactados</label>
+                <label className="block text-xs font-medium text-[var(--color-git-muted)] mb-1.5 uppercase tracking-wider">
+                  {isRootLaw ? 'Alcance territorial' : 'Bairros impactados'}
+                </label>
                 <div className="flex flex-wrap gap-2">
                   {neighborhoods.map((neighborhood) => (
-                    <button key={neighborhood.id} type="button" onClick={() => toggleNeighborhood(neighborhood.id)} className={`px-3 py-1.5 rounded-lg text-xs border transition-colors ${impactedNeighborhoodIds.includes(neighborhood.id) ? 'bg-[var(--color-git-blue)] text-white border-[rgba(88,166,255,0.5)]' : 'bg-[var(--color-git-bg2)] text-[var(--color-git-text)] border-[var(--color-git-border)]'}`}>
+                    <button key={neighborhood.id} type="button" onClick={() => toggleNeighborhood(neighborhood.id)} disabled={isRootLaw} className={`px-3 py-1.5 rounded-lg text-xs border transition-colors ${impactedNeighborhoodIds.includes(neighborhood.id) ? 'bg-[var(--color-git-blue)] text-white border-[rgba(88,166,255,0.5)]' : 'bg-[var(--color-git-bg2)] text-[var(--color-git-text)] border-[var(--color-git-border)]'} ${isRootLaw ? 'cursor-default opacity-90' : ''}`}>
                       {neighborhood.nome}
                     </button>
                   ))}
                 </div>
+                {isRootLaw ? (
+                  <p className="mt-2 text-xs text-[var(--color-git-muted)]">
+                    Documentos raiz afetam todo o municipio, entao o sistema fixa automaticamente todos os bairros como escopo da emenda.
+                  </p>
+                ) : null}
               </div>
               <label className="flex items-center gap-2 text-sm text-[var(--color-git-muted)]">
                 <input type="checkbox" checked={urgency} onChange={(event) => setUrgency(event.target.checked)} />
@@ -307,6 +393,24 @@ export function NovaProposta() {
               </div>
             </div>
 
+            {governance ? (
+              <div className="rounded-xl border border-[var(--color-git-border)] bg-[var(--color-git-bg2)] p-4 text-sm text-[var(--color-git-text)]">
+                <p className="font-medium mb-2">Politica institucional desta proposta</p>
+                <div className="space-y-1.5 text-xs text-[var(--color-git-muted)]">
+                  <p>Regra de aprovacao: {governance.approvalLabel}</p>
+                  <p>Janela minima de debate: {governance.minimumVotingWindowDays} dias</p>
+                  <p>Protecao institucional: {governance.codeownersLabel}</p>
+                  {requiresPublicHearing ? (
+                    <p>
+                      Audiencia publica: {publicHearingRegistered && publicHearingDate && publicHearingProtocol
+                        ? `registrada em ${publicHearingDate} sob ${publicHearingProtocol}`
+                        : 'pendente de registro'}
+                    </p>
+                  ) : null}
+                </div>
+              </div>
+            ) : null}
+
             {!willOpenVoting ? (
               <div className="bg-[rgba(210,153,34,0.1)] border border-[rgba(210,153,34,0.3)] rounded-xl p-4 flex items-start gap-3">
                 <AlertTriangle className="w-5 h-5 text-[var(--color-git-amber)] shrink-0 mt-0.5" />
@@ -337,7 +441,7 @@ export function NovaProposta() {
           ) : (
             <button 
               onClick={() => void handleSign()}
-              disabled={isSigning}
+              disabled={isSigning || (requiresPublicHearing && (!publicHearingRegistered || !publicHearingDate.trim() || !publicHearingProtocol.trim()))}
               className="w-full py-3 bg-[var(--color-git-green)] hover:opacity-90 text-white rounded-xl font-medium transition-opacity text-sm border border-[rgba(63,185,80,0.5)] flex items-center justify-center gap-2 disabled:opacity-50"
             >
               {isSigning ? (

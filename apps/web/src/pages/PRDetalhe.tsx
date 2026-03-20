@@ -52,6 +52,7 @@ export function PRDetalhe() {
 
   const config = statusConfig[pr.status];
   const isVariationProposal = pr.kind === 'variacao_local';
+  const governance = pr.governanca;
   const newVersionHref = pr.artigoAlvoId
     ? `/propostas/nova?lawId=${pr.leiAlvoId}&articleId=${pr.artigoAlvoId}&proposalId=${pr.id}`
     : null;
@@ -199,6 +200,28 @@ export function PRDetalhe() {
             </div>
           </div>
         </div>
+
+        {governance ? (
+          <div className="rounded-[24px] border border-[var(--color-git-border)] bg-[var(--color-git-bg2)] p-4">
+            <h2 className="text-sm font-semibold text-[var(--color-git-text)]">Regras institucionais desta proposta</h2>
+            <div className="mt-3 grid grid-cols-1 gap-2 text-xs text-[var(--color-git-muted)]">
+              <p>Regra de aprovacao: <span className="text-[var(--color-git-text)]">{governance.approvalLabel}</span></p>
+              <p>Janela minima de debate: <span className="text-[var(--color-git-text)]">{governance.minimumVotingWindowDays} dias</span></p>
+              <p>Protecao institucional: <span className="text-[var(--color-git-text)]">{governance.codeownersLabel}</span></p>
+              {governance.requiresPublicHearing ? (
+                <p>
+                  Audiencia publica:
+                  <span className="text-[var(--color-git-text)]">
+                    {' '}
+                    {governance.publicHearingRegistered
+                      ? `registrada em ${governance.publicHearingDate} sob ${governance.publicHearingProtocol}`
+                      : 'pendente de registro'}
+                  </span>
+                </p>
+              ) : null}
+            </div>
+          </div>
+        ) : null}
 
         <div className="rounded-[24px] border border-[var(--color-git-border)] bg-[var(--color-git-bg2)] p-4">
           <div className="flex items-start justify-between gap-3">

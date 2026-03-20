@@ -1,8 +1,10 @@
 import {
   authorizeAction,
   buildFeed,
+  buildLawGovernancePolicy,
   buildLawSummary,
   buildProfile,
+  buildProposalGovernanceSnapshot,
   buildProposalView,
   calculateVoteWeight,
   createActivity,
@@ -147,6 +149,17 @@ export function issueCitizenship(store, input) {
   return { citizenAddress: address };
 }
 
+function buildMunicipalReach(store) {
+  return [...new Set(store.neighborhoods.map((item) => item.id).filter(Boolean))];
+}
+
+function resolveRootLawQuorum(store, law) {
+  const activeCitizens = store.citizens.filter((item) => item.ativo).length;
+  const quorumFraction = Number(law.quorumEspecial ?? 0.5);
+  const rawQuorum = (activeCitizens || 1) * quorumFraction;
+  return Math.max(1, Math.ceil(rawQuorum * 10) / 10);
+}
+
 export function createProposal(store, input) {
   ensureStoreCollections(store);
   const authority = authorizeAction(store, {
@@ -161,6 +174,8 @@ export function createProposal(store, input) {
   must(citizen.ativo, 'A cidadania desta carteira nao esta ativa.');
 
   const law = must(findLaw(store, input.lawId), 'Lei nao encontrada.');
+  const lawGovernance = buildLawGovernancePolicy(law);
+  const proposalGovernance = buildProposalGovernanceSnapshot(law, input.governance);
   const kind = resolveProposalKind(input);
   const title = sanitizeText(input.title);
   const justification = sanitizeText(input.justification);
@@ -229,19 +244,32 @@ export function createProposal(store, input) {
     newText = sanitizeText(input.newText);
     must(newText.length >= 40, 'A proposta precisa de uma comparacao textual completa.');
 
-    const rawImpactedNeighborhoodIds =
-      input.impactedNeighborhoodIds?.length > 0
-        ? input.impactedNeighborhoodIds
-        : [citizen.bairroId];
-    impactedNeighborhoodIds = [...new Set(rawImpactedNeighborhoodIds)];
-
-    must(
-      impactedNeighborhoodIds.every((neighborhoodId) => Boolean(findNeighborhood(store, neighborhoodId))),
-      'Existem bairros impactados invalidos na proposta.',
-    );
-
     ci = evaluateCi(law, article, newText);
-    quorum = law.isFork ? 1.2 : 2;
+
+    if (lawGovernance.requiresPublicHearing) {
+      must(
+        proposalGovernance.publicHearingRegistered,
+        'Propostas sobre o Plano Diretor exigem audiencia publica registrada antes da publicacao.',
+      );
+    }
+
+    if (law.isRoot) {
+      impactedNeighborhoodIds = buildMunicipalReach(store);
+      quorum = resolveRootLawQuorum(store, law);
+    } else {
+      const rawImpactedNeighborhoodIds =
+        input.impactedNeighborhoodIds?.length > 0
+          ? input.impactedNeighborhoodIds
+          : [citizen.bairroId];
+      impactedNeighborhoodIds = [...new Set(rawImpactedNeighborhoodIds)];
+
+      must(
+        impactedNeighborhoodIds.every((neighborhoodId) => Boolean(findNeighborhood(store, neighborhoodId))),
+        'Existem bairros impactados invalidos na proposta.',
+      );
+
+      quorum = law.isFork ? 1.2 : 2;
+    }
   }
 
   initialState = determineInitialProposalState({ kind, ci });
@@ -268,7 +296,9 @@ export function createProposal(store, input) {
     oldText: article?.texto,
     newText,
     quorum,
-    votingEndsAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
+    votingEndsAt: new Date(
+      Date.now() + lawGovernance.minimumVotingWindowDays * 24 * 60 * 60 * 1000,
+    ).toISOString(),
     closedAt: undefined,
     resolutionReason: undefined,
     votes: [],
@@ -276,6 +306,7 @@ export function createProposal(store, input) {
     forkId: fork?.id,
     source: law.isFork ? 'fork' : 'municipal',
     variationDraft,
+    governanca: proposalGovernance,
   };
 
   store.proposals.push(proposal);
@@ -291,6 +322,12 @@ export function createProposal(store, input) {
       status: proposal.status,
       kind,
       impactedNeighborhoodIds,
+      governance: {
+        approvalRule: proposalGovernance.approvalRule,
+        requiresPublicHearing: proposalGovernance.requiresPublicHearing,
+        publicHearingRegistered: proposalGovernance.publicHearingRegistered,
+        minimumVotingWindowDays: proposalGovernance.minimumVotingWindowDays,
+      },
       variationDraft:
         kind === 'variacao_local'
           ? {
@@ -313,6 +350,10 @@ export function createProposal(store, input) {
       leiId: proposal.leiAlvoId,
       status: proposal.status,
       kind,
+      governance: {
+        approvalRule: proposalGovernance.approvalRule,
+        publicHearingRegistered: proposalGovernance.publicHearingRegistered,
+      },
     },
   });
 

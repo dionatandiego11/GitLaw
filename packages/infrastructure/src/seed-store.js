@@ -38,6 +38,18 @@ const neighborhoods = [
 
 const commits = [
   {
+    id: 'commit-lo-001',
+    leiId: 'lei-organica',
+    hash: '0x0000genesis1',
+    mensagem: 'genesis: publica lei organica municipal de Brumadinho',
+    autor: '0xPrefeituraBrumadinho000000000000000000000001',
+    timestamp: '2026-01-01T00:00:00Z',
+    versao: '3.0.0',
+    resumo:
+      'Publicacao inicial da Lei Organica Municipal como repositorio raiz do sistema GitLaw. Define soberania popular, direitos de participacao, estrutura de bairros e as regras de emenda constitucional.',
+    articleChanges: [],
+  },
+  {
     id: 'commit-001',
     leiId: 'lei-1',
     hash: '0x4b1f47aa1',
@@ -117,13 +129,94 @@ const commits = [
 
 const laws = [
   {
+    id: 'lei-organica',
+    titulo: 'Lei Organica do Municipio de Brumadinho',
+    numero: 'Lei Organica Municipal / 1990',
+    categoria: 'constituicao',
+    versao: '3.0.0',
+    atualizadaEm: '2026-01-01T00:00:00Z',
+    resumo:
+      'Constituicao municipal de Brumadinho. Define a estrutura de poder, os direitos fundamentais dos cidadaos e as regras basicas de participacao democratica.',
+    isRoot: true,
+    quorumEspecial: 0.67,
+    artigos: [
+      {
+        id: 'lo-art-1',
+        rotulo: 'Art. 1o',
+        texto:
+          'O Municipio de Brumadinho, pessoa juridica de direito publico interno, exerce sua autonomia nos termos da Constituicao Federal, da Constituicao do Estado de Minas Gerais e desta Lei Organica.',
+        ultimaAtualizacaoEm: '2026-01-01T00:00:00Z',
+        ultimoAutor: '0xPrefeituraBrumadinho000000000000000000000001',
+        ultimoCommitId: 'commit-lo-001',
+      },
+      {
+        id: 'lo-art-2',
+        rotulo: 'Art. 2o',
+        texto:
+          'Todo poder emana do povo. No GitLaw, o cidadao registrado exerce diretamente o poder de propor, debater e votar alteracoes nas normas municipais, de forma rastreavel e auditavel.',
+        ultimaAtualizacaoEm: '2026-01-01T00:00:00Z',
+        ultimoAutor: '0xPrefeituraBrumadinho000000000000000000000001',
+        ultimoCommitId: 'commit-lo-001',
+      },
+      {
+        id: 'lo-art-3',
+        rotulo: 'Art. 3o',
+        texto:
+          'Sao principios fundamentais do Municipio: a soberania popular, a dignidade da pessoa humana, a transparencia administrativa, a funcao social da propriedade e a sustentabilidade ambiental.',
+        ultimaAtualizacaoEm: '2026-01-01T00:00:00Z',
+        ultimoAutor: '0xPrefeituraBrumadinho000000000000000000000001',
+        ultimoCommitId: 'commit-lo-001',
+      },
+      {
+        id: 'lo-art-10',
+        rotulo: 'Art. 10',
+        texto:
+          'Sao direitos do cidadao registrado: participar das deliberacoes publicas, acessar o historico completo de qualquer alteracao normativa, propor emendas a leis ordinarias e votar com peso proporcional ao seu vinculo territorial.',
+        ultimaAtualizacaoEm: '2026-01-01T00:00:00Z',
+        ultimoAutor: '0xPrefeituraBrumadinho000000000000000000000001',
+        ultimoCommitId: 'commit-lo-001',
+      },
+      {
+        id: 'lo-art-25',
+        rotulo: 'Art. 25',
+        texto:
+          'O Municipio e organizado em bairros com autonomia participativa. Cada bairro pode propor variacoes locais de leis ordinarias, desde que nao contrariem esta Lei Organica nem o Plano Diretor.',
+        ultimaAtualizacaoEm: '2026-01-01T00:00:00Z',
+        ultimoAutor: '0xPrefeituraBrumadinho000000000000000000000001',
+        ultimoCommitId: 'commit-lo-001',
+      },
+      {
+        id: 'lo-art-40',
+        rotulo: 'Art. 40',
+        texto:
+          'O orcamento municipal sera anualmente votado pela cidadania ativa, com prioridades definidas por bairro e consolidadas em votacao ponderada de alcance municipal.',
+        ultimaAtualizacaoEm: '2026-01-01T00:00:00Z',
+        ultimoAutor: '0xPrefeituraBrumadinho000000000000000000000001',
+        ultimoCommitId: 'commit-lo-001',
+      },
+      {
+        id: 'lo-art-60',
+        rotulo: 'Art. 60',
+        texto:
+          'Esta Lei Organica somente podera ser emendada por proposta aprovada com quorum minimo de dois teros dos cidadaos ativos, respeitado periodo de 30 dias de debate publico antes da votacao.',
+        ultimaAtualizacaoEm: '2026-01-01T00:00:00Z',
+        ultimoAutor: '0xPrefeituraBrumadinho000000000000000000000001',
+        ultimoCommitId: 'commit-lo-001',
+      },
+    ],
+    commitIds: ['commit-lo-001'],
+  },
+  {
     id: 'lei-1',
     titulo: 'Plano Diretor Estrategico',
     numero: 'Lei Complementar 105/2014',
     categoria: 'urbanismo',
     versao: '4.2.0',
     atualizadaEm: '2026-02-15T10:00:00Z',
-    resumo: 'Define diretrizes de uso e ocupacao do solo do municipio com trilha completa de versoes.',
+    resumo:
+      'Repositorio raiz de zoneamento, uso e ocupacao do solo. Toda proposta de alteracao territorial deve ter este documento como alvo e exige quorum qualificado.',
+    isRoot: true,
+    quorumEspecial: 0.6,
     artigos: [
       {
         id: 'lei-1-art-1',

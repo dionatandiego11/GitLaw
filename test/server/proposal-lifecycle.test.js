@@ -73,6 +73,60 @@ describe('server proposal lifecycle', () => {
     );
   });
 
+  it('opens root-law amendments with municipal reach and qualified quorum', () => {
+    const store = cloneStore();
+
+    const result = createProposal(store, {
+      authorAddress: DEMO_CITIZEN_ADDRESS,
+      lawId: 'lei-organica',
+      articleId: 'lo-art-60',
+      title: 'Ajusta regra de emenda da Lei Organica com validacao municipal',
+      justification:
+        'Clarifica o rito de emenda da Lei Organica para manter trilha auditavel, debate publico e validacao de alcance municipal em todo o territorio.',
+      newText:
+        'Esta Lei Organica somente podera ser emendada por proposta aprovada com quorum minimo qualificado dos cidadaos ativos, assegurado debate publico municipal, historico auditavel da redacao e janela formal de deliberacao antes da votacao final.',
+      impactedNeighborhoodIds: ['sape'],
+      issueId: '#raiz-1',
+      urgency: false,
+    });
+
+    assert.deepEqual(result.proposal.impactedNeighborhoodIds, [
+      'sape',
+      'centro',
+      'conceicao-itagua',
+      'corrego-feijao',
+    ]);
+    assert.equal(result.proposal.quorum, 2.1);
+    assert.equal(result.proposal.leiAlvoId, 'lei-organica');
+    assert.equal(result.proposal.artigoAlvoId, 'lo-art-60');
+    const openedAt = new Date(result.proposal.criadoEm).getTime();
+    const votingEndsAt = new Date(result.proposal.votingEndsAt).getTime();
+    const days = Math.round((votingEndsAt - openedAt) / (24 * 60 * 60 * 1000));
+    assert.equal(days, 30);
+  });
+
+  it('requires a registered public hearing for Plano Diretor amendments', () => {
+    const store = cloneStore();
+
+    assert.throws(
+      () =>
+        createProposal(store, {
+          authorAddress: DEMO_CITIZEN_ADDRESS,
+          lawId: 'lei-1',
+          articleId: 'lei-1-art-2',
+          title: 'Revisa parametro territorial do Plano Diretor no bairro Centro',
+          justification:
+            'A proposta altera parametro sensivel do Plano Diretor e, por isso, precisa respeitar audiencia publica registrada antes da publicacao para deliberacao municipal.',
+          newText:
+            'A politica urbana devera observar a funcao social da cidade, a participacao cidada, a transparencia na revisao das normas e a audiencia publica registrada em toda revisao territorial relevante.',
+          impactedNeighborhoodIds: ['centro'],
+          issueId: '#pd-87',
+          urgency: false,
+        }),
+      /audiencia publica registrada/,
+    );
+  });
+
   it('links new fork proposals back to the owning fork record', () => {
     const store = cloneStore();
     const fork = store.forks.find((item) => item.id === 'fork-1');

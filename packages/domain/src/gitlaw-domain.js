@@ -128,6 +128,84 @@ export function isVariationAuthorizationProposal(proposal) {
   return resolveProposalKind(proposal) === 'variacao_local';
 }
 
+export function buildLawGovernancePolicy(law) {
+  const defaultPolicy = {
+    approvalRule: 'maioria_simples',
+    approvalLabel: 'maioria simples',
+    minimumVotingWindowDays: 14,
+    requiresPublicHearing: false,
+    protectionMode: 'livre',
+    codeowners: ['cidadania-ativa'],
+    codeownersLabel: 'cidadania ativa',
+  };
+
+  if (!law) {
+    return defaultPolicy;
+  }
+
+  if (law.id === 'lei-organica' || law.categoria === 'constituicao') {
+    return {
+      approvalRule: 'supermaioria',
+      approvalLabel: 'supermaioria de 2/3 dos cidadaos ativos',
+      minimumVotingWindowDays: 30,
+      requiresPublicHearing: false,
+      protectionMode: 'codeowners_civicos',
+      codeowners: ['supermaioria-cidada', 'debate-publico-30-dias'],
+      codeownersLabel: 'supermaioria cidada + debate publico minimo',
+    };
+  }
+
+  if (law.id === 'lei-1') {
+    return {
+      approvalRule: 'maioria_qualificada',
+      approvalLabel: 'maioria qualificada com alcance municipal',
+      minimumVotingWindowDays: 21,
+      requiresPublicHearing: true,
+      protectionMode: 'codeowners_civicos',
+      codeowners: ['audiencia-publica-registrada', 'maioria-qualificada', 'alcance-municipal'],
+      codeownersLabel: 'audiencia publica + maioria qualificada',
+    };
+  }
+
+  if (law.isFork) {
+    return {
+      approvalRule: 'maioria_simples',
+      approvalLabel: 'maioria simples territorial',
+      minimumVotingWindowDays: 10,
+      requiresPublicHearing: false,
+      protectionMode: 'livre',
+      codeowners: ['cidadania-territorial'],
+      codeownersLabel: 'cidadania territorial ativa',
+    };
+  }
+
+  return defaultPolicy;
+}
+
+export function buildProposalGovernanceSnapshot(law, governanceInput = {}) {
+  const policy = buildLawGovernancePolicy(law);
+  const publicHearingDate = sanitizeText(governanceInput?.publicHearingDate);
+  const publicHearingProtocol = sanitizeText(governanceInput?.publicHearingProtocol);
+  const publicHearingRegistered = policy.requiresPublicHearing
+    ? Boolean(governanceInput?.publicHearingRegistered) &&
+      Boolean(publicHearingDate) &&
+      Boolean(publicHearingProtocol)
+    : false;
+  const pendingRequirements = [];
+
+  if (policy.requiresPublicHearing && !publicHearingRegistered) {
+    pendingRequirements.push('audiencia publica registrada');
+  }
+
+  return {
+    ...policy,
+    publicHearingRegistered,
+    publicHearingDate: publicHearingDate || undefined,
+    publicHearingProtocol: publicHearingProtocol || undefined,
+    pendingRequirements,
+  };
+}
+
 export function buildVoteLockReason({ proposal, citizen, address, hasVoted, deadlineReached }) {
   if (!address) {
     return 'Conecte uma carteira para participar da votacao.';
@@ -142,6 +220,10 @@ export function buildVoteLockReason({ proposal, citizen, address, hasVoted, dead
   }
 
   if (proposal.status === 'em-revisao') {
+    if (proposal.governanca?.pendingRequirements?.includes('audiencia publica registrada')) {
+      return 'A proposta aguarda audiencia publica registrada antes de abrir votacao.';
+    }
+
     return 'A proposta ainda esta em revisao legislativa e nao abriu votacao.';
   }
 
@@ -397,6 +479,8 @@ export function calculateVoteWeight(store, citizen, proposal) {
 export function buildProposalView(store, proposal, address) {
   const citizen = address ? findCitizen(store, address) : null;
   const kind = resolveProposalKind(proposal);
+  const law = findLaw(store, proposal.leiAlvoId);
+  const governance = proposal.governanca ?? buildProposalGovernanceSnapshot(law, proposal.governanca);
   const hasVoted = Boolean(
     citizen &&
       proposal.votes.some((vote) => sameAddress(vote.address, citizen.address)),
@@ -415,6 +499,7 @@ export function buildProposalView(store, proposal, address) {
   return {
     ...proposal,
     kind,
+    governanca: governance,
     tally,
     workflowStage: resolveProposalWorkflowStage(proposal),
     availableActions: buildProposalAvailableActions(store, proposal, address),
@@ -504,6 +589,7 @@ function buildRejectionDescription(proposal, reason) {
 export function buildLawSummary(law) {
   return {
     ...law,
+    governanca: buildLawGovernancePolicy(law),
     artigos: [...law.artigos].sort((left, right) => left.rotulo.localeCompare(right.rotulo)),
   };
 }

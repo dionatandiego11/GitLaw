@@ -1,4 +1,5 @@
 export type CategoriaLei =
+  | 'constituicao'
   | 'urbanismo'
   | 'saude'
   | 'educacao'
@@ -8,6 +9,10 @@ export type CategoriaLei =
 
 export type ProposalStatus = 'aberto' | 'em-revisao' | 'aprovado' | 'rejeitado';
 export type ProposalKind = 'emenda' | 'variacao_local';
+export type LawApprovalRule =
+  | 'maioria_simples'
+  | 'maioria_qualificada'
+  | 'supermaioria';
 export type ProposalWorkflowStage =
   | 'admissibilidade'
   | 'revisao'
@@ -127,6 +132,23 @@ export interface LawArticle {
   ultimoCommitId: string;
 }
 
+export interface LawGovernancePolicy {
+  approvalRule: LawApprovalRule;
+  approvalLabel: string;
+  minimumVotingWindowDays: number;
+  requiresPublicHearing: boolean;
+  protectionMode: 'livre' | 'codeowners_civicos';
+  codeowners: string[];
+  codeownersLabel: string;
+}
+
+export interface ProposalGovernanceSnapshot extends LawGovernancePolicy {
+  publicHearingRegistered: boolean;
+  publicHearingDate?: string;
+  publicHearingProtocol?: string;
+  pendingRequirements: string[];
+}
+
 export interface Law {
   id: string;
   titulo: string;
@@ -135,6 +157,11 @@ export interface Law {
   versao: string;
   atualizadaEm: string;
   resumo: string;
+  /** Repositório raiz (Lei Orgânica, Plano Diretor). Aparece pinado em /leis e exige quórum especial. */
+  isRoot?: boolean;
+  /** Fração mínima de quórum ponderado para alterar este doc raiz (ex: 0.67 = 2/3). */
+  quorumEspecial?: number;
+  governanca?: LawGovernancePolicy;
   isFork?: boolean;
   bairroId?: string;
   bairroNome?: string;
@@ -205,6 +232,7 @@ export interface Proposal {
   forkId?: string;
   source: 'municipal' | 'fork';
   variationDraft?: ProposalVariationDraft;
+  governanca?: ProposalGovernanceSnapshot;
 }
 
 export interface ProposalTally {
@@ -361,6 +389,11 @@ export interface CreateProposalInput {
   impactedNeighborhoodIds?: string[];
   issueId?: string;
   urgency?: boolean;
+  governance?: {
+    publicHearingRegistered?: boolean;
+    publicHearingDate?: string;
+    publicHearingProtocol?: string;
+  };
   variationDraft?: {
     name: string;
     objective: string;
